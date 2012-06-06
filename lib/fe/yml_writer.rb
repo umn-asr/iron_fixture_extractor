@@ -27,7 +27,9 @@ module Fe
           # props to Rails Receipts 3rd edition book for these 4 lines
           # below
           file.write records.inject({}) {|hash, record|
-            hash["r#{self.counter}"] = record.attributes
+            # Array() bit done to support composite primary keys
+            fixture_name = "r#{Array(record.id).join('_')}"
+            hash[fixture_name] = record.attributes
             hash
           }.to_yaml
         end

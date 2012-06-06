@@ -12,22 +12,15 @@ class BasicUsage < ActiveSupport::TestCase
       assert_respond_to Fe, :extract
     end
     context "Simplest usage" do
-      # Tests this usage
-      #   # extract
-      #   Fe.extract Post.first, :path => 'first_post'
-      #   Wrote 1 Post row to test/tmp/fe_fixtures/first_post/post.yml
-      #
-      #   # load
-      #   Fe.load(:first_post)
       setup do
         FileUtils.mkdir_p TestConfig.fixtures_root
         Fe.fixtures_root = TestConfig.fixtures_root
       end
       should "provide the right output, and put the file in the right place" do
-        # CONTINUE HERE
-        extract_output = Fe.extract(Post.first, :name => 'first_post')
+        extract_code = 'Post.includes(:comments, :author).limit(1)'
+        extract_output = Fe.extract(extract_code, :name => 'first_post_w_comments_and_authors')
         assert_match /Wrote/, extract_output
-        assert File.exists?('test/tmp/fe_fixtures/first_post/post.yml'), "The file is created"
+        assert File.exists?('test/tmp/fe_fixtures/first_post_w_comments_and_authors/post.yml'), "The file is created"
       end
       teardown do
         # TODO: delete everything in fixtures folder
