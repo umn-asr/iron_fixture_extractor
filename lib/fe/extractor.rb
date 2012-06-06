@@ -1,6 +1,11 @@
 module Fe
   class Extractor
-    attr_accessor :extract_code, :input_array
+    # This is for documentation purposes to illustrate how the fixture was built, and will allow you to reload the fixture using this code later against a different database 
+    attr_accessor :extract_code
+    attr_reader :input_array
+    def input_array=(active_relation_or_array)
+      @input_array = active_relation_or_array.to_a
+    end
     # Returns a hash with model class names for keys and Set's of AR
     # instances for values
     def output_hash
@@ -14,7 +19,6 @@ module Fe
     end
     protected
     def recurse(record)
-      debugger
       raise "This gem only knows how to extract stuff w ActiveRecord" unless record.kind_of? ActiveRecord::Base
       @output_hash[record.class] ||= Set.new # Set ensures no duplicates
       @output_hash[record.class].add record 

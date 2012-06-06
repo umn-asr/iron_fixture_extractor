@@ -44,9 +44,8 @@ class BasicUsage < ActiveSupport::TestCase
       assert_equal extract_code, e.output_hash[Post].first
     end
     should "work with recursive loading" do
-      extract_code = Post.includes(:comments, :author)
       e=Fe::Extractor.new
-      e.input_array = [extract_code]
+      e.input_array = Post.includes(:comments, :author)
       assert (e.output_hash.keys - [Post,Comment,Author]).empty?, "There are only keys for the eager loaded models"
     end
   end
