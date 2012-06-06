@@ -2,9 +2,11 @@ require "fe/version"
 require "active_record"
 require "active_support/all"
 require "set" # introduced in Ruby standard lib in 1.9
+require "fileutils"
 module Fe
   extend ActiveSupport::Autoload
   autoload :Extractor
+  autoload :YmlWriter
   # global configuration
    
   @@fixtures_root = 'test/fe_fixtures'
@@ -21,12 +23,17 @@ module Fe
         query_code = query
         query_results = Array(eval(query))
       else
-        query_code = "No load code specified"
+        query_code = "load code not specified as string, you won't be able to reload this fixture from another database"
         query_results = Array(query)
       end
       extractor = Fe::Extractor.new
       extractor.extract_code = query_code
       extractor.input_array = query_results
+      yml_writer = Fe::YmlWriter.new(extractor, 
+                                     options[:name] || Time.now.strftime("%Y_%m_%d_%H_%M_%S"),
+                                     self.fixtures_root)
+      debugger
+      yml_writer.write
       "Wrote TODO"
     end
   end

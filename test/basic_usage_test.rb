@@ -25,9 +25,9 @@ class BasicUsage < ActiveSupport::TestCase
       end
       should "provide the right output, and put the file in the right place" do
         # CONTINUE HERE
-        extract_output = Fe.extract(Post.first, :path => 'first_post')
+        extract_output = Fe.extract(Post.first, :name => 'first_post')
         assert_match /Wrote/, extract_output
-#        assert File.exists?('test/tmp/fe_fixtures/first_post/post.yml'), "The file is created"
+        assert File.exists?('test/tmp/fe_fixtures/first_post/post.yml'), "The file is created"
       end
       teardown do
         # TODO: delete everything in fixtures folder

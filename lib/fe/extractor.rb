@@ -18,6 +18,7 @@ module Fe
       @output_hash
     end
     protected
+    # Recursively goes over all association_cache's from the record and builds the output_hash
     def recurse(record)
       raise "This gem only knows how to extract stuff w ActiveRecord" unless record.kind_of? ActiveRecord::Base
       @output_hash[record.class] ||= Set.new # Set ensures no duplicates
