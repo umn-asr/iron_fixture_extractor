@@ -3,7 +3,10 @@ require 'bundler'
 Bundler.setup
 require 'shoulda'
 require 'fe'
+# TEMP, COMMENT OUT IF NEEDED
 require 'sqlite3'
+require 'ruby-debug'
+
 @connections = YAML::load_file(File.join(File.dirname(__FILE__), 'config', 'database.yml'))
 
 require 'fileutils'
