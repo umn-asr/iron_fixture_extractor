@@ -1,5 +1,6 @@
 require "fe/version"
 require "active_record"
+require 'active_record/fixtures'
 require "active_support/all"
 require "set" # introduced in Ruby standard lib in 1.9
 require "fileutils"
@@ -34,6 +35,12 @@ module Fe
                                      self.fixtures_root)
       yml_writer.write
       "Wrote TODO"
+    end
+
+    def load_db(extract_name)
+      # TODDDDDDDOOOOOOOOOOOOOO: iterate over files in directory and
+      # call this...
+      ActiveRecord::Fixtures.create_fixtures(File.join(self.fixtures_root, extract_name.to_s), 'posts')
     end
   end
   # Internalish API methods used to support the top-level ones

@@ -8,7 +8,7 @@ module Fe
       @fixture_file_stats = {}
     end
     def target_path
-      File.join(self.path,self.name)
+      File.join(self.path,self.name.to_s)
     end
     def counter
       if @counter.nil?
@@ -23,7 +23,7 @@ module Fe
       self.extractor.output_hash.each_pair do |key,records|
         # key is an ActiveRecord class
         # records is an array of records to write
-        File.open(File.join(self.target_path,"#{key.to_s.underscore}.yml"),'w') do |file|
+        File.open(File.join(self.target_path,"#{key.table_name.pluralize}.yml"),'w') do |file|
           # props to Rails Receipts 3rd edition book for these 4 lines
           # below
           file.write records.inject({}) {|hash, record|

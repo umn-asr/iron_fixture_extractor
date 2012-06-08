@@ -53,7 +53,8 @@ fit.
       author.yml (1 records, 4.3 kilo-bytes)
       fe_manifest.yml (used by Fe.rebuild(:first_post_w_comments_and_authors))
    
-#### Rebuild
+#### Load
+#### Rebuild/Re-Extract an Existing Fixture Set
   Fe.rebuild(:first_post_w_comments_and_authors)
 
 ### Usage via Rake/Command Line
