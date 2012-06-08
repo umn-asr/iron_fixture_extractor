@@ -32,7 +32,6 @@ module Fe
       yml_writer = Fe::YmlWriter.new(extractor, 
                                      options[:name] || Time.now.strftime("%Y_%m_%d_%H_%M_%S"),
                                      self.fixtures_root)
-      debugger
       yml_writer.write
       "Wrote TODO"
     end

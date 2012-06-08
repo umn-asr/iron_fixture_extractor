@@ -1,5 +1,11 @@
-sqlite:
+fake_production:
   adapter: sqlite3
-  database: test/tmp/test.sqlite3
+  database: test/tmp/fake_production.sqlite3
+  pool: 5
+  timeout: 5000
+
+fake_test:
+  adapter: sqlite3
+  database: test/tmp/fake_test.sqlite3
   pool: 5
   timeout: 5000

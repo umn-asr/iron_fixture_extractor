@@ -12,5 +12,5 @@ task :default => 'test'
 
 desc "Open an irb session preloaded with this library"
 task :console do
-  sh "irb -rubygems -I lib -r fe.rb"
+  sh "irb -rubygems -I lib -I test -r fe.rb"
 end

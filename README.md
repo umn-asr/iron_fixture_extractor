@@ -43,14 +43,29 @@ Fe is designed to be used in an interactive Ruby shell or Rails console,
 if you want a rake task or whatever, feel free to wrap it up as you see
 fit.
 
-### Basic usage: Fe.extract 'CrustwareApp.first'
+### Usage in Ruby
+#### Extract
+  Fe.extract 'Post.includes(:comments, :author).limit(1)', name: 'first_post_w_comments_and_authors'
+  =>
+    Wrote 3 fixture files to /test/fe_fixtures/first_post_w_comments_and_authors
+      post.yml (2 records, 4.3 kilo-bytes)
+      comment.yml (5 records, 4.3 kilo-bytes)
+      author.yml (1 records, 4.3 kilo-bytes)
+      fe_manifest.yml (used by Fe.rebuild(:first_post_w_comments_and_authors))
+   
+#### Rebuild
+  Fe.rebuild(:first_post_w_comments_and_authors)
 
-   Fe.extract 'CrustwareApp.first'
-   :path not specified, dir created at /test/fe_fixtures/2012_06_03_12_35_44/
-   Wrote 1 CrustwareApp record to crustware_app.csv
-   Wrote 1 Iron Fixture Extractor manifest to test/fixtures/crustware_app/manifest.yml
- 
+### Usage via Rake/Command Line
+rake is just a wrapper for calls for the main Fe API methods like
+.extract and .rebuild, you might run extract like:
 
+  rake fe:extract "'Post.includes(:comments, :author).limit(1)', name: 'first_post_w_comments_and_authors'"
+
+to make the rake tasks included with the gem available to your app,
+TODO: SPECIFY
+
+    
 ## Contributing
 
 1. Fork it
