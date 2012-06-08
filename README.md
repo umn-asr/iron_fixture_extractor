@@ -1,3 +1,8 @@
+# TO FINISH/RELEASE GEM
+* Write and expose rake tasks to Rails environment via Railtie
+* Create the .rebuild function
+
+
 # About
 Iron fixture extractor (Fe) makes extracting complex ActiveRecord dependency graphs from live databases sane.  Feed it an array of ActiveRecord objects that have preloaded associations via the .include method and it will write a bunch of fixture files for usage in test cases that require the hairy data extracted from your gnarly real-world production database.
 
