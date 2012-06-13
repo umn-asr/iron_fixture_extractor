@@ -8,6 +8,10 @@ module Fe
     end
     # Returns a hash with model class names for keys and Set's of AR
     # instances for values
+    # aka like this
+    #   {'Post' => [<#Post id:1>,<#Post id:2>],
+    #    'Comment' => [<#Comment id:1>,<#Comment id:2>]}
+    #
     def output_hash
       if @output_hash.blank?
         @output_hash = {}
@@ -21,8 +25,8 @@ module Fe
     # Recursively goes over all association_cache's from the record and builds the output_hash
     def recurse(record)
       raise "This gem only knows how to extract stuff w ActiveRecord" unless record.kind_of? ActiveRecord::Base
-      @output_hash[record.class] ||= Set.new # Set ensures no duplicates
-      @output_hash[record.class].add record 
+      @output_hash[record.class.to_s] ||= Set.new # Set ensures no duplicates
+      @output_hash[record.class.to_s].add record 
       record.association_cache.each do |assoc_cache|
         assoc_name = assoc_cache.first
         assoc_value = assoc_cache.last.target

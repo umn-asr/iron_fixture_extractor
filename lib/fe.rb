@@ -17,7 +17,9 @@ module Fe
   class << self
     # Algorithm Overview
     # * Resolve the query if it's been given as a string
-    # * Instantiate an object with the resolved
+    # * Instantiate underlying object with the resolved rows
+    #   to do the dirty work
+    # * Spit out some stats about what just happened
     def extract(query,*args)
       options = args.extract_options!
       if query.kind_of? String
@@ -34,7 +36,7 @@ module Fe
                                      options[:name] || Time.now.strftime("%Y_%m_%d_%H_%M_%S"),
                                      self.fixtures_root)
       yml_writer.write
-      "Wrote TODO"
+      yml_writer.stats_hash
     end
 
     def load_db(extract_name)

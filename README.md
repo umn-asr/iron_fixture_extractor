@@ -1,8 +1,16 @@
 # TO FINISH/RELEASE GEM
-* Write and expose rake tasks to Rails environment via Railtie
+## MUST HAVES
+* Dir.glob to load everything
 * Create the .rebuild function and writing of fe_manifest.rb
   >>> ALl of the stats from .extract should be written to the
   >>> fe_manifest with a datetime as well.
+
+end
+
+## WOULD BE NICE
+* Write and expose rake tasks to Rails environment via Railtie
+
+
 
 * Figure how to deal with localizing model table_names...
   For example when we load Ps::Person into a test database, the table

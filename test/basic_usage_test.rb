@@ -7,9 +7,12 @@ class BasicUsage < ActiveSupport::TestCase
     end
     context ".extract" do
       should "provide the right output, and put the file in the right place" do
-        extract_output = Fe.extract(@extract_code, :name => @extract_name)
-        assert_match /Wrote/, extract_output
-        assert File.exists?('test/tmp/fe_fixtures/first_post_w_comments_and_authors/posts.yml'), "The file is created"
+        extract_hash = Fe.extract(@extract_code, :name => @extract_name)
+        assert (%w(Post Comment Author) - extract_hash.keys).empty?, "only these keys should exist"
+        assert_equal 'posts', extract_hash['Post']['table_name']
+        assert_equal 1, extract_hash['Post']['row_count']
+        assert File.exists?(File.join(Fe.fixtures_root,'first_post_w_comments_and_authors','posts.yml')), "The file is created"
+        assert File.exists?(File.join(Fe.fixtures_root,'first_post_w_comments_and_authors','fe_manifest.yml')), "The file that allows the fixtures to get rebuilt"
       end
     end
     context ".load_db" do
