@@ -26,7 +26,7 @@ module Fe
                             'row_count'  => records.length}
         # key is an ActiveRecord class
         # records is an array of records to write
-        File.open(File.join(self.target_path,"#{klass.table_name.pluralize}.yml"),'w') do |file|
+        File.open(File.join(self.target_path,"#{klass.table_name}.yml"),'w') do |file|
           # props to Rails Receipts 3rd edition book for these 4 lines
           # below
           file.write records.inject({}) {|hash, record|

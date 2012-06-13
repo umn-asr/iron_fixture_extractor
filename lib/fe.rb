@@ -9,6 +9,7 @@ module Fe
   autoload :Extractor
   autoload :YmlWriter
   autoload :Rebuilder
+  autoload :Manifest
 
   # global configuration
    
@@ -42,9 +43,11 @@ module Fe
     end
 
     def load_db(extract_name)
-      # TODDDDDDDOOOOOOOOOOOOOO: iterate over files in directory and
-      # call this...
-      ActiveRecord::Fixtures.create_fixtures(File.join(self.fixtures_root, extract_name.to_s), 'posts')
+      fixture_path_for_extract = File.join(Fe.fixtures_root,extract_name.to_s)
+      manifest = Fe::Manifest.new(fixture_path_for_extract)
+      manifest.mappings.each_pair do |key,hash|
+        ActiveRecord::Fixtures.create_fixtures(fixture_path_for_extract, hash['table_name'])
+      end
     end
     def rebuild(extract_name)
       
