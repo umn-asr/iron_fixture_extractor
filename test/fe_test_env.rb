@@ -16,11 +16,10 @@ class FeTestEnv
       ActiveRecord::Migrator.migrate(File.join(File.dirname(__FILE__),'test_data_migrations'),nil)
     end
     def destroy_tmp_test_stuff #sqlite dbs and fixture files
-        FileUtils.rm_rf File.join(File.dirname(__FILE__), "tmp/*")
-      begin
-      rescue 
-        puts "Couldn't rm_rf fixtures at #{self.fixtures_root}"
-      end
+      FileUtils.rm_rf Dir.glob("#{self.tmp_directory}/*")
+    end
+    def tmp_directory
+      File.join(File.dirname(__FILE__), "tmp")
     end
     def establish_connection
       ActiveRecord::Base.establish_connection(self.connections[self.the_env])
@@ -66,6 +65,15 @@ class FeTestEnv
     end
     def teardown
       self.teardown_methods.each {|m| send m}
+    end
+    def recreate_schema_without_data
+      f=File.join(self.tmp_directory,"#{self.the_env}.sqlite3")
+      begin
+        FileUtils.rm f
+      rescue
+        puts "#{f} does not exist"
+      end
+      [:load_models, :establish_connection,:migrate_schema].each {|m| send m}
     end
     def reload
       teardown

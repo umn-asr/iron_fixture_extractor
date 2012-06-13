@@ -6,6 +6,12 @@ class BasicUsage < ActiveSupport::TestCase
       @extract_name = :first_post_w_comments_and_authors
     end
     context ".extract" do
+      setup do
+        FeTestEnv.setup
+      end
+      teardown do
+        FeTestEnv.teardown
+      end
       should "provide the right output, and put the file in the right place" do
         extract_hash = Fe.extract(@extract_code, :name => @extract_name)
         assert (%w(Post Comment Author) - extract_hash.keys).empty?, "only these keys should exist"
@@ -16,13 +22,30 @@ class BasicUsage < ActiveSupport::TestCase
       end
     end
     context ".load_db" do
-      should "provide the ability to load fixtures" do
+      setup do
+        FeTestEnv.setup # regular production db
+        extract_hash = Fe.extract(@extract_code, :name => @extract_name)
         FeTestEnv.the_env = 'fake_test'
-        FeTestEnv.establish_connection
-:w
-        FeTestEnv.reload
+        FeTestEnv.recreate_schema_without_data
+      end
+      teardown do
+        FeTestEnv.teardown
+      end
+      should "provide the ability to load fixtures" do
+        assert_equal 0, Post.count
+        assert_equal 0, Comment.count
+        assert_equal 0, Author.count
         Fe.load_db(@extract_name)
-        assert Post.count > 0, "booya"
+        assert_equal 1, Post.count
+        assert_equal 1, Comment.count
+        assert_equal 1, Author.count
+      end
+    end
+    context ".rebuild" do
+      should "be able to rebuild the fixture files from the manifest" do
+        FeTestEnv.destroy_tmp_test_stuff
+        rebuild_hash = Fe.rebuild(@extract_name)
+        #assert_equal 0, Post.count
       end
     end
   end

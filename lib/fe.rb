@@ -8,6 +8,8 @@ module Fe
   extend ActiveSupport::Autoload
   autoload :Extractor
   autoload :YmlWriter
+  autoload :Rebuilder
+
   # global configuration
    
   @@fixtures_root = 'test/fe_fixtures'
@@ -43,6 +45,9 @@ module Fe
       # TODDDDDDDOOOOOOOOOOOOOO: iterate over files in directory and
       # call this...
       ActiveRecord::Fixtures.create_fixtures(File.join(self.fixtures_root, extract_name.to_s), 'posts')
+    end
+    def rebuild(extract_name)
+      
     end
   end
   # Internalish API methods used to support the top-level ones
