@@ -43,6 +43,9 @@ module Fe
     end
 
     def load_into_database
+      # necessary to make multiple invocations possible in a single test
+      # case possible
+      ActiveRecord::Fixtures.reset_cache
       self.models.each do |model|
         ActiveRecord::Fixtures.create_fixtures(self.target_path, model.table_name)
       end
@@ -67,6 +70,8 @@ module Fe
       self.output_hash.keys
     end
 
+    # Note: this behavior is different if load_from_manifest vs
+    # load_from_args
     def models
       @models ||= self.model_names.map {|x| x.constantize}
     end

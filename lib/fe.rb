@@ -22,11 +22,14 @@ module Fe
       extractor
     end
 
+    # NOTE: This is destructive, it will delete everything in the target table
+    #
     def load_db(extract_name)
       extractor = Fe::Extractor.new
       extractor.name = extract_name
       extractor.load_from_manifest
       extractor.load_into_database
+      extractor
     end
     def rebuild(extract_name)
       extractor = Fe::Extractor.new
