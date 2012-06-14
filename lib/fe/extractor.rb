@@ -1,29 +1,15 @@
 module Fe
   class Extractor
     attr_accessor :input_array, :extract_code, :name, :row_counts,:table_names
-    def initialize(active_relation_or_array,*args)
-      options = args.extract_options!
-      @name = (options[:name] || Time.now.strftime("%Y_%m_%d_%H_%M_%S")).to_sym
-      if active_relation_or_array.kind_of? String
-        @extract_code = active_relation_or_array 
-        @input_array = Array(eval(active_relation_or_array)).to_a
-      else
-        @extract_code = "load code not specified as string, you won't be able to reload this fixture from another database"
-        @input_array = Array(active_relation_or_array).to_a
-      end
 
+    def extract
       @row_counts = {}
       @table_names = {}
       self.output_hash.each_pair do |key,records|
         @row_counts[key] = records.length
         @table_names[key] = key.constantize.table_name
       end
-    end
-    def self.new_from_manifest(extract_name)
-      h = YAML.load_file(File.join(Fe.fixtures_root,extract_name.to_s,'fe_manifest.yml'))
-      t = self.new(h[:extract_code], :name => h[:name])
-    end
-    def write_fixtures
+
       FileUtils.rmdir(self.target_path)
       FileUtils.mkdir_p(self.target_path)
       File.open(self.manifest_file_path,'w') do |file|
@@ -37,11 +23,29 @@ module Fe
       self.write_model_fixtures
     end
 
-    def load_into_database
-      #manifest.mappings.each_pair do |key,hash|
-        #ActiveRecord::Fixtures.create_fixtures(fixture_path_for_extract, hash['table_name'])
-      #end
+    def load_from_args(active_relation_or_array,*args)
+      options = args.extract_options!
+      @name = (options[:name] || Time.now.strftime("%Y_%m_%d_%H_%M_%S")).to_sym
+      if active_relation_or_array.kind_of? String
+        @extract_code = active_relation_or_array 
+        @input_array = Array(eval(active_relation_or_array)).to_a
+      else
+        @extract_code = "load code not specified as string, you won't be able to reload this fixture from another database"
+        @input_array = Array(active_relation_or_array).to_a
+      end
+    end
 
+    def load_from_manifest
+      raise "u gotta set .name to use this method" if self.name.blank?
+      h = YAML.load_file(self.manifest_file_path)
+      self.load_from_args(h[:extract_code], :name => h[:name])
+      @models = h[:model_names].map {|x| x.constantize}
+    end
+
+    def load_into_database
+      self.models.each do |model|
+        ActiveRecord::Fixtures.create_fixtures(self.target_path, model.table_name)
+      end
     end
     # Returns a hash with model class names for keys and Set's of AR
     # instances for values
@@ -62,8 +66,9 @@ module Fe
     def model_names
       self.output_hash.keys
     end
+
     def models
-      self.model_names.map {|x| x.constantize}
+      @models ||= self.model_names.map {|x| x.constantize}
     end
 
     def target_path
@@ -73,9 +78,16 @@ module Fe
     def manifest_file_path
       File.join(self.target_path,'fe_manifest.yml')
     end
+
+    def fixture_path_for_model(model_name)
+      File.join(self.target_path,"#{model_name.constantize.table_name}.yml")
+    end
+
     protected
 
     # Recursively goes over all association_cache's from the record and builds the output_hash
+    # This is the meat-and-potatoes of this tool (plus the the recurse
+    # method) is where something interesting is happening
     def recurse(record)
       raise "This gem only knows how to extract stuff w ActiveRecord" unless record.kind_of? ActiveRecord::Base
       @output_hash[record.class.to_s] ||= Set.new # Set ensures no duplicates
@@ -94,10 +106,9 @@ module Fe
     def write_model_fixtures
       FileUtils.mkdir_p(self.target_path)
       self.output_hash.each_pair do |key,records|
-        klass = key.constantize
         # key is an ActiveRecord class
         # records is an array of records to write
-        File.open(File.join(self.target_path,"#{klass.table_name}.yml"),'w') do |file|
+        File.open(self.fixture_path_for_model(key),'w') do |file|
           # props to Rails Receipts 3rd edition book for these 4 lines
           # below
           file.write records.inject({}) {|hash, record|

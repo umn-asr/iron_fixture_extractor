@@ -39,17 +39,30 @@ class BasicUsage < ActiveSupport::TestCase
         assert_equal 0, Author.count
         Fe.load_db(@extract_name)
         assert_equal 1, Post.count
-        #assert_equal 1, Comment.count
-        #assert_equal 1, Author.count
+        assert_equal 1, Comment.count
+        assert_equal 1, Author.count
       end
     end
     context ".rebuild" do
+      setup do
+        FeTestEnv.setup
+        @extractor = Fe.extract(@extract_code, :name => @extract_name)
+      end
+      teardown do
+#        FeTestEnv.teardown
+      end
       should "be able to rebuild the fixture files from the manifest" do
         # TODO: continue here, should delete a comment, then rebuild,
         # and assert
         #   all files mtimes have changed
         #   there is no comment file
+        results = eval(@extract_code)
+        first_post = results.first
+        assert_match /First post/i, first_post.name
+        first_post.name = "UPDATED_FIRST_POST"
+        first_post.save!
         rebuild_hash = Fe.rebuild(@extract_name)
+        assert_match /UPDATED_FIRST_POST/, File.read(@extractor.fixture_path_for_model('Post'))
         #assert_equal 0, Post.count
       end
     end
