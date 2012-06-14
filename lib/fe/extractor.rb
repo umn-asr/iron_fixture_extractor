@@ -30,7 +30,7 @@ module Fe
         @extract_code = active_relation_or_array 
         @input_array = Array(eval(active_relation_or_array)).to_a
       else
-        @extract_code = "load code not specified as string, you won't be able to reload this fixture from another database"
+        @extract_code = "CANNOT_REBUILD_THIS_FIXTURE_SET_USE_STRING_ARG_TO_DOT_EXTRACT_METHOD"
         @input_array = Array(active_relation_or_array).to_a
       end
     end
@@ -38,6 +38,9 @@ module Fe
     def load_from_manifest
       raise "u gotta set .name to use this method" if self.name.blank?
       h = YAML.load_file(self.manifest_file_path)
+      if h[:extract_code].match /CANNOT_REBUILD_THIS_FIXTURE_SET_USE_STRING_ARG_TO_DOT_EXTRACT_METHOD/
+        h[:extract_code] = [] # To make stuff not break cause it thinks its a string
+      end
       self.load_from_args(h[:extract_code], :name => h[:name])
       @models = h[:model_names].map {|x| x.constantize}
     end
