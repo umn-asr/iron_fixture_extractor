@@ -1,12 +1,17 @@
 module Fe
   class Extractor
-    attr_reader :input_array, :extract_code, :name, :manifest,:fixture_writer,:row_counts,:table_names
+    attr_accessor :input_array, :extract_code, :name, :row_counts,:table_names
     def initialize(active_relation_or_array,*args)
       options = args.extract_options!
       @name = (options[:name] || Time.now.strftime("%Y_%m_%d_%H_%M_%S")).to_sym
-      @manifest = Fe::Manifest.new(self)
-      @fixture_writer = Fe::YmlWriter.new(self)
-      set_extract_code_and_input_array(active_relation_or_array)
+      if active_relation_or_array.kind_of? String
+        @extract_code = active_relation_or_array 
+        @input_array = Array(eval(active_relation_or_array)).to_a
+      else
+        @extract_code = "load code not specified as string, you won't be able to reload this fixture from another database"
+        @input_array = Array(active_relation_or_array).to_a
+      end
+
       @row_counts = {}
       @table_names = {}
       self.output_hash.each_pair do |key,records|
@@ -14,9 +19,13 @@ module Fe
         @table_names[key] = key.constantize.table_name
       end
     end
+    def self.new_from_manifest(extract_name)
+      h = YAML.load_file(File.join(Fe.fixtures_root,extract_name.to_s,'fe_manifest.yml'))
+      t = self.new(h[:extract_code], :name => h[:name])
+    end
     def write_fixtures
-      self.fixture_writer.write
-      self.manifest
+      FileUtils.rmdir(self.target_path)
+      FileUtils.mkdir_p(self.target_path)
       File.open(self.manifest_file_path,'w') do |file|
         file.write( {:extract_code => self.extract_code,
                     :name => self.name,
@@ -25,6 +34,14 @@ module Fe
                     :table_names => self.models.map {|m| m.table_name}
                     }.to_yaml)
       end
+      self.write_model_fixtures
+    end
+
+    def load_into_database
+      #manifest.mappings.each_pair do |key,hash|
+        #ActiveRecord::Fixtures.create_fixtures(fixture_path_for_extract, hash['table_name'])
+      #end
+
     end
     # Returns a hash with model class names for keys and Set's of AR
     # instances for values
@@ -58,16 +75,6 @@ module Fe
     end
     protected
 
-
-    def set_extract_code_and_input_array(active_relation_or_array)
-      if active_relation_or_array.kind_of? String
-        @extract_code = active_relation_or_array 
-        @input_array = Array(eval(active_relation_or_array)).to_a
-      else
-        @extract_code = "load code not specified as string, you won't be able to reload this fixture from another database"
-        @input_array = Array(active_relation_or_array).to_a
-      end
-    end
     # Recursively goes over all association_cache's from the record and builds the output_hash
     def recurse(record)
       raise "This gem only knows how to extract stuff w ActiveRecord" unless record.kind_of? ActiveRecord::Base
@@ -81,6 +88,24 @@ module Fe
         end
         assoc_value.each do |a|
           self.recurse(a)
+        end
+      end
+    end
+    def write_model_fixtures
+      FileUtils.mkdir_p(self.target_path)
+      self.output_hash.each_pair do |key,records|
+        klass = key.constantize
+        # key is an ActiveRecord class
+        # records is an array of records to write
+        File.open(File.join(self.target_path,"#{klass.table_name}.yml"),'w') do |file|
+          # props to Rails Receipts 3rd edition book for these 4 lines
+          # below
+          file.write records.inject({}) {|hash, record|
+            # Array() bit done to support composite primary keys
+            fixture_name = "r#{Array(record.id).join('_')}"
+            hash[fixture_name] = record.attributes
+            hash
+          }.to_yaml
         end
       end
     end

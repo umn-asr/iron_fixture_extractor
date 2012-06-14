@@ -20,29 +20,29 @@ class BasicUsage < ActiveSupport::TestCase
         assert_equal Post.table_name, extractor.table_names['Post']
         assert File.exists?(File.join(Fe.fixtures_root,'first_post_w_comments_and_authors','fe_manifest.yml')), "The file that allows the fixtures to get rebuilt"
         assert_equal 1, extractor.row_counts['Post']
-        assert File.exists?(File.join(Fe.fixtures_root,'first_post_w_comments_and_authors','posts.yml')), "The file is created"
+        assert File.exists?(File.join(Fe.fixtures_root,'first_post_w_comments_and_authors',"#{Post.table_name}.yml")), "The file is created"
       end
     end
-    #context ".load_db" do
-      #setup do
-        #FeTestEnv.setup # regular production db
-        #extract_hash = Fe.extract(@extract_code, :name => @extract_name)
-        #FeTestEnv.the_env = 'fake_test'
-        #FeTestEnv.recreate_schema_without_data
-      #end
-      #teardown do
-        #FeTestEnv.teardown
-      #end
-      #should "provide the ability to load fixtures" do
-        #assert_equal 0, Post.count
-        #assert_equal 0, Comment.count
-        #assert_equal 0, Author.count
-        #Fe.load_db(@extract_name)
-        #assert_equal 1, Post.count
+    context ".load_db" do
+      setup do
+        FeTestEnv.setup # regular production db
+        extract_hash = Fe.extract(@extract_code, :name => @extract_name)
+        FeTestEnv.the_env = 'fake_test'
+        FeTestEnv.recreate_schema_without_data
+      end
+      teardown do
+        FeTestEnv.teardown
+      end
+      should "provide the ability to load fixtures" do
+        assert_equal 0, Post.count
+        assert_equal 0, Comment.count
+        assert_equal 0, Author.count
+        Fe.load_db(@extract_name)
+        assert_equal 1, Post.count
         #assert_equal 1, Comment.count
         #assert_equal 1, Author.count
-      #end
-    #end
+      end
+    end
     context ".rebuild" do
       should "be able to rebuild the fixture files from the manifest" do
         # TODO: continue here, should delete a comment, then rebuild,

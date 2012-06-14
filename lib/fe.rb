@@ -23,38 +23,13 @@ module Fe
       extractor.write_fixtures
       extractor
     end
-    # Algorithm Overview
-    # * Resolve the query if it's been given as a string
-    # * Instantiate underlying object with the resolved rows
-    #   to do the dirty work
-    # * Spit out some stats about what just happened
-    #def extract(query,*args)
-      #options = args.extract_options!
-      #if query.kind_of? String
-        #query_code = query
-        #query_results = Array(eval(query))
-      #else
-        #query_code = "load code not specified as string, you won't be able to reload this fixture from another database"
-        #query_results = Array(query)
-      #end
-      #extractor = Fe::Extractor.new
-      #extractor.extract_code = query_code
-      #extractor.input_array = query_results
-      #yml_writer = Fe::YmlWriter.new(extractor, 
-                                     #options[:name] || Time.now.strftime("%Y_%m_%d_%H_%M_%S"),
-                                     #self.fixtures_root)
-      #yml_writer.write
-      #extractor.write_manifest
-      #yml_writer.stats_hash
-    #end
 
     def load_db(extract_name)
-      fixture_path_for_extract = File.join(Fe.fixtures_root,extract_name.to_s)
-      manifest = Fe::Manifest.new(fixture_path_for_extract)
-      manifest.load
-      manifest.mappings.each_pair do |key,hash|
-        ActiveRecord::Fixtures.create_fixtures(fixture_path_for_extract, hash['table_name'])
-      end
+      extractor = Fe::Extractor.new_from_manifest(extract_name)
+      extractor.load_into_database
+      #manifest.mappings.each_pair do |key,hash|
+        #ActiveRecord::Fixtures.create_fixtures(fixture_path_for_extract, hash['table_name'])
+      #end
     end
     def rebuild(extract_name)
       
