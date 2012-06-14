@@ -1,43 +1,45 @@
-# TO FINISH/RELEASE GEM
-## MUST HAVES
-* Dir.glob to load everything
-* Create the .rebuild function and writing of fe_manifest.rb
-  >>> ALl of the stats from .extract should be written to the
-  >>> fe_manifest with a datetime as well.
-
-end
-
-## WOULD BE NICE
-* Write and expose rake tasks to Rails environment via Railtie
-
-
-
-* Figure how to deal with localizing model table_names...
-  For example when we load Ps::Person into a test database, the table
-name the models are bound to needs to change...seems out of scope of
-this tool
-
-TODO: do something with this:
-https://docs.google.com/a/umn.edu/document/d/1dIMZl5flZKOj_lldlWK1TTNVRZce0OCrCptD1YvyGY4/edit
-
 # About
-Iron fixture extractor (Fe) makes extracting complex ActiveRecord dependency graphs from live databases sane.  Feed it an array of ActiveRecord objects that have preloaded associations via the .include method and it will write a bunch of fixture files for usage in test cases that require the hairy data extracted from your gnarly real-world production/external/legacy database.
 
-This gem is handy when:
-* you need real data for test cases
-* factories are worthless because the underlying data is too complex  
-* manual fixture creation would be time consuming and brittle
+When factories don't work, manual fixture generation is cumbersome and
+brittle, bust out the Iron Fixture Extractor!
 
-Fe was initially designed to tackle the problem of writing test cases against
-crust-ware software systems that have been here since the stone age:
-neither manually generated fixtures or factory based methods do an
-adequate job capturing representative data for test cases--in these cases, you have
-to get to the metal.
+                       `###                       
+                        ,#                        
+                         '                        
+                        ,+,                       
+                        +#,                       
+    ;+############++++++++++++++++++++++++++++    
+     ;                   +                  `:    
+     :                   +                   :    
+     .                   '                   :    
+    .                    +                  `'    
+    :.                   ,                  `'    
+    ##                  +#                  ++,   
+   .++`                 ;#;                 :+    
+    ''                  ;+`                `;;'   
+   ;::'                `;;.                +;;+'  
+  :;:;':               +;;''              '+'+++: 
+ `:';'++.             '+''+`;            .;;;;;''.
+ :,'''';;            `````````                    
+~|~ _ _  _         |~. _|_   _ _      (~ _|_ _ _  __|_ _  _
+_|_| (_)| |        |~|><||_|| (/_     (_><| | (_|(_ | (_)|
+     Iron             Fixture             Extractor
+                         is
+                      handy when
+        you require complex data extracted from 
+                   crusty legacy 
+                         or 
+                       big ERP
+                      databases
+                         for
+                      test cases.
+
+Iron fixture extractor makes extracting complex ActiveRecord dependency graphs from live databases sane.  Feed it an array of ActiveRecord objects that have preloaded associations via the .include method or just an adhoc array of ActiveRecord instances you want to capture as fixtures and it will write a bunch of fixture files for usage in your test cases.
 
 ## Installation
 Add this line to your application's Gemfile:
 
-    gem 'fe'
+    gem 'iron_fixture_extractor'
 
 And then execute:
 
@@ -48,6 +50,9 @@ Or install it yourself as:
     $ gem install fe
 
 ## Usage
+The Iron Fixture Extractor gem exposes everything under the Fe
+namespace, we'll refer to it as "Fe" from here on out.
+
 Fe is designed to be used in an interactive Ruby shell or Rails console.
 The idea is to poke around your data via your ActiveRecord models, then
 once you have a good dataset, use Fe.extract to load it into fixture
@@ -92,33 +97,3 @@ files you can write tests against.
 Before writing this Gem, I investigated the following approaches to get ideas, thanks to the authors behind these tools, blog posts, etc.
 * http://nhw.pl/wp/2009/09/24/extracting-fixtures
   http://nhw.pl/download/extract_fixtures.rake
-
-## SCRAPS TO DELETE/PROCESS
- > ar=Ps::Person.joins(:names).limit(1)
- > ar.joins.ast.cores[0].source.right[0].left.name
- => "asr_warehouse.ps_names" 
-
-
-x=Poof::DataCollection.new(Ps::Person.includes(:names, :acad_progs).limit(1))
-x.set_columns_for(Ps::Person, :emplid)
-x.set_columns_for(Ps::Names, [:emplid,:name_type])
-x.set_columns_for(Ps::AcadProg, [:emplid,:acad_prog])
-x.data =>
-  {Ps::Person => Hash
-   Ps::Names => Hash
-   Ps::AcadProg => Hash
-  }
-  # where each hash is restricted to just the columns specified
-z.localize_models_to_db(:test)
-=> true # goes in and switches out the .table_name for each model in the
-data collection
-
-## Input
-* command: extract|load|unload
-* scenario name
-* source database
-* target database
-
-## Output
-rake poof:extract
-reload
