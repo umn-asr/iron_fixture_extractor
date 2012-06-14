@@ -13,37 +13,42 @@ class BasicUsage < ActiveSupport::TestCase
         FeTestEnv.teardown
       end
       should "provide the right output, and put the file in the right place" do
-        extract_hash = Fe.extract(@extract_code, :name => @extract_name)
-        assert (%w(Post Comment Author) - extract_hash.keys).empty?, "only these keys should exist"
-        assert_equal 'posts', extract_hash['Post']['table_name']
-        assert_equal 1, extract_hash['Post']['row_count']
-        assert File.exists?(File.join(Fe.fixtures_root,'first_post_w_comments_and_authors','posts.yml')), "The file is created"
+        extractor = Fe.extract(@extract_code, :name => @extract_name)
+        assert_kind_of Fe::Extractor, extractor
+        assert (%w(Post Comment Author) - extractor.model_names).empty?, "only these keys should exist"
+        assert_equal @extract_name, extractor.name
+        assert_equal Post.table_name, extractor.table_names['Post']
         assert File.exists?(File.join(Fe.fixtures_root,'first_post_w_comments_and_authors','fe_manifest.yml')), "The file that allows the fixtures to get rebuilt"
+        assert_equal 1, extractor.row_counts['Post']
+        assert File.exists?(File.join(Fe.fixtures_root,'first_post_w_comments_and_authors','posts.yml')), "The file is created"
       end
     end
-    context ".load_db" do
-      setup do
-        FeTestEnv.setup # regular production db
-        extract_hash = Fe.extract(@extract_code, :name => @extract_name)
-        FeTestEnv.the_env = 'fake_test'
-        FeTestEnv.recreate_schema_without_data
-      end
-      teardown do
-        FeTestEnv.teardown
-      end
-      should "provide the ability to load fixtures" do
-        assert_equal 0, Post.count
-        assert_equal 0, Comment.count
-        assert_equal 0, Author.count
-        Fe.load_db(@extract_name)
-        assert_equal 1, Post.count
-        assert_equal 1, Comment.count
-        assert_equal 1, Author.count
-      end
-    end
+    #context ".load_db" do
+      #setup do
+        #FeTestEnv.setup # regular production db
+        #extract_hash = Fe.extract(@extract_code, :name => @extract_name)
+        #FeTestEnv.the_env = 'fake_test'
+        #FeTestEnv.recreate_schema_without_data
+      #end
+      #teardown do
+        #FeTestEnv.teardown
+      #end
+      #should "provide the ability to load fixtures" do
+        #assert_equal 0, Post.count
+        #assert_equal 0, Comment.count
+        #assert_equal 0, Author.count
+        #Fe.load_db(@extract_name)
+        #assert_equal 1, Post.count
+        #assert_equal 1, Comment.count
+        #assert_equal 1, Author.count
+      #end
+    #end
     context ".rebuild" do
       should "be able to rebuild the fixture files from the manifest" do
-        FeTestEnv.destroy_tmp_test_stuff
+        # TODO: continue here, should delete a comment, then rebuild,
+        # and assert
+        #   all files mtimes have changed
+        #   there is no comment file
         rebuild_hash = Fe.rebuild(@extract_name)
         #assert_equal 0, Post.count
       end
