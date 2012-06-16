@@ -4,8 +4,8 @@ require File.expand_path('../lib/fe/version', __FILE__)
 Gem::Specification.new do |gem|
   gem.authors       = ["Joe Goggins"]
   gem.email         = ["goggins@umn.edu"]
-  gem.description   = %q{TODO: Write a gem description}
-  gem.summary       = %q{TODO: Write a gem summary}
+  gem.description   = %q{When object factories don't work because your data is too complex and creating manual fixtures is cumbersome and brittle: Iron Fixture Extractor (for Rails/ActiveRecord) }
+  gem.summary       = %q{Simplified dynamic fixture extraction for ActiveRecord}
   gem.homepage      = ""
 
   gem.files         = `git ls-files`.split($\)
