@@ -6,7 +6,7 @@ Gem::Specification.new do |gem|
   gem.email         = ["goggins@umn.edu"]
   gem.description   = %q{When object factories don't work because your data is too complex and creating manual fixtures is cumbersome and brittle: Iron Fixture Extractor (for Rails/ActiveRecord) }
   gem.summary       = %q{Simplified dynamic fixture extraction for ActiveRecord}
-  gem.homepage      = ""
+  gem.homepage      = "https://github.com/joegoggins/iron_fixture_extractor"
 
   gem.files         = `git ls-files`.split($\)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
