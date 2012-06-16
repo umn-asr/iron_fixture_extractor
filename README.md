@@ -67,9 +67,10 @@ doesn't cover.
 This uses the fe_manifest.yml's extract_code to re-extract fixtures
 using the same code used to initially create them.  Its handy when the live data changes and you want to refresh the fixture files to reflect it.
 
-  Fe.rebuild(:first_post_w_comments_and_authors)
+    Fe.rebuild(:first_post_w_comments_and_authors)
 
 ## How it works
+
 ### Extract
 The essense of the Fe.extract algorithm is:
 
@@ -84,13 +85,12 @@ The magic is all in the recursive usage of ActiveRecord::Base#association_cache.
     p.comments
     Fe.extract(p)
 
-you will get 2 fixture files: 1 post record fixture and N comment
-fixtures.
+you will get 2 fixture files: 1 post record fixture (not-surprising) and N comment fixtures because p.association_cache is populated for :comments on the post instance p.
 
 ### Load Fixtures
 This uses the same mechanism as Rails' `rake db:fixtures:load`, aka ActiveRecord::Fixtures.create_fixtures method
 
-### Rebuild
+### Rebuild Fixture Files
 This is just like .extract, except the code used to do the query is
 pulled from the fe_manifest.yml file.
 
@@ -126,15 +126,15 @@ If you have other ideas for this tool, make a Github Issue.
 I used various ideas from the following blog posts, gists, and existing
 ruby gems, thanks to the authors of these pages:
 
-http://nhw.pl/wp/2009/09/24/extracting-fixtures
-http://nhw.pl/download/extract_fixtures.rake
-https://rubygems.org/gems/fixture_builder
-https://rubygems.org/gems/fixture_dependencies
-http://topfunky.net/svn/plugins/ar_fixtures/
-https://gist.github.com/997746
-https://gist.github.com/2686783
-http://snippets.dzone.com/posts/show/4729
-http://rubygems.org/search?utf8=%E2%9C%93&query=fixture
-http://www.dan-manges.com/blog/38
-http://www.martinfowler.com/bliki/ObjectMother.html
-http://asciicasts.com/episodes/158-factories-not-fixtures
+* http://nhw.pl/wp/2009/09/24/extracting-fixtures
+* http://nhw.pl/download/extract_fixtures.rake
+* https://rubygems.org/gems/fixture_builder
+* https://rubygems.org/gems/fixture_dependencies
+* http://topfunky.net/svn/plugins/ar_fixtures/
+* https://gist.github.com/997746
+* https://gist.github.com/2686783
+* http://snippets.dzone.com/posts/show/4729
+* http://rubygems.org/search?utf8=%E2%9C%93&query=fixture
+* http://www.dan-manges.com/blog/38
+* http://www.martinfowler.com/bliki/ObjectMother.html
+* http://asciicasts.com/episodes/158-factories-not-fixtures
