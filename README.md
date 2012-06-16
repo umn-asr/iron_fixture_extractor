@@ -46,7 +46,7 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install fe
+    $ gem install iron_fixture_extractor
 
 ## Usage
 The Iron Fixture Extractor gem exposes everything under the Fe

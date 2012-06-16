@@ -4,5 +4,5 @@ source 'https://rubygems.org'
 # http://dirk.net/2010/04/17/ruby-debug-with-ruby-19x-and-rails-3-on-rvm/
 gem 'ruby-debug19', :require => 'ruby-debug'
 gem 'rake'
-# Specify your gem's dependencies in fe.gemspec
+# Specify your gem's dependencies in iron_fixture_extractor.gemspec
 gemspec

@@ -1,9 +1,4 @@
-require "fe/version"
-require "active_record"
-require 'active_record/fixtures'
-require "active_support/all"
-require "set" # introduced in Ruby standard lib in 1.9
-require "fileutils"
+# NOTE: require 'iron_fixture_extractor', NOT this file
 module Fe
   extend ActiveSupport::Autoload
   autoload :Extractor
