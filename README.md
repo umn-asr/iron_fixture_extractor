@@ -1,40 +1,34 @@
 # About
 
 When object factories don't work because your data is too complex and creating manual fixtures is cumbersome and brittle: Iron Fixture Extractor.
-    
-                           `###                       
-                            ,#                        
-                             '                        
-                            ,+,                       
-                            +#,                       
-        ;+############++++++++++++++++++++++++++++    
-         ;                   +                  `:    
-         :                   +                   :    
-         .                   '                   :    
-        .                    +                  `'    
-        :.                   ,                  `'    
-        ##                  +#                  ++,   
-       .++`                 ;#;                 :+    
-        ''                  ;+`                `;;'   
-       ;::'                `;;.                +;;+'  
-      :;:;':               +;;''              '+'+++: 
-     `:';'++.             '+''+`;            .;;;;;''.
-     :,'''';;            `````````                    
-    ~|~ _ _  _         |~. _|_   _ _      (~ _|_ _ _  __|_ _  _
-    _|_| (_)| |        |~|><||_|| (/_     (_><| | (_|(_ | (_)|
-         Iron             Fixture             Extractor
-                             is
-                          handy when
-            you require complex data extracted from 
-                       crusty legacy 
-                             or 
-                           big ERP
-                          databases
-                             for
-                          test cases.
-    
-Iron fixture extractor makes extracting complex ActiveRecord dependency graphs from live databases sane.  Feed it an array of ActiveRecord objects that have preloaded associations via the .include method or just an adhoc array of ActiveRecord instances you want to capture as fixtures and it will write a bunch of fixture files for usage in your test cases.
 
+Iron fixture extractor makes extracting complex ActiveRecord dependency graphs from live databases sane.  Feed it an array of ActiveRecord objects that have preloaded associations via the .include method or just an adhoc array of ActiveRecord instances you want to capture as fixtures and it will write a bunch of fixture files for usage in your test cases.
+          
+                                     `###                       
+                                      ,#                        
+                                      +#,                       
+                  ;+############++++++++++++++++++++++++++++    
+                   ;                   +                  `:    
+                  ##                  +#                  ++,   
+                 .++`                 ;#;                 :+    
+                  ''                  ;+`                `;;'   
+                 ;::'                `;;.                +;;+'  
+                :;:;':               +;;''              '+'+++: 
+               `:';'++.             '+''+`;            .;;;;;''.
+               :,'''';;            `````````                    
+              ~|~ _ _  _         |~. _|_   _ _      (~ _|_ _ _  __|_ _  _
+              _|_| (_)| |        |~|><||_|| (/_     (_><| | (_|(_ | (_)|
+                   Iron             Fixture             Extractor
+                                       is
+                                    handy when
+                      you require complex data extracted from 
+                                 crusty legacy 
+                                       or 
+                                     big ERP
+                                    databases
+                                       for
+                                    test cases.
+    
 ## Installation
 Add this line to your application's Gemfile:
 
