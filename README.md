@@ -1,38 +1,38 @@
 # About
 
 When object factories don't work because your data is too complex and creating manual fixtures is cumbersome and brittle: Iron Fixture Extractor.
-
-                       `###                       
-                        ,#                        
-                         '                        
-                        ,+,                       
-                        +#,                       
-    ;+############++++++++++++++++++++++++++++    
-     ;                   +                  `:    
-     :                   +                   :    
-     .                   '                   :    
-    .                    +                  `'    
-    :.                   ,                  `'    
-    ##                  +#                  ++,   
-   .++`                 ;#;                 :+    
-    ''                  ;+`                `;;'   
-   ;::'                `;;.                +;;+'  
-  :;:;':               +;;''              '+'+++: 
- `:';'++.             '+''+`;            .;;;;;''.
- :,'''';;            `````````                    
-~|~ _ _  _         |~. _|_   _ _      (~ _|_ _ _  __|_ _  _
-_|_| (_)| |        |~|><||_|| (/_     (_><| | (_|(_ | (_)|
-     Iron             Fixture             Extractor
-                         is
-                      handy when
-        you require complex data extracted from 
-                   crusty legacy 
-                         or 
-                       big ERP
-                      databases
-                         for
-                      test cases.
-
+    
+                           `###                       
+                            ,#                        
+                             '                        
+                            ,+,                       
+                            +#,                       
+        ;+############++++++++++++++++++++++++++++    
+         ;                   +                  `:    
+         :                   +                   :    
+         .                   '                   :    
+        .                    +                  `'    
+        :.                   ,                  `'    
+        ##                  +#                  ++,   
+       .++`                 ;#;                 :+    
+        ''                  ;+`                `;;'   
+       ;::'                `;;.                +;;+'  
+      :;:;':               +;;''              '+'+++: 
+     `:';'++.             '+''+`;            .;;;;;''.
+     :,'''';;            `````````                    
+    ~|~ _ _  _         |~. _|_   _ _      (~ _|_ _ _  __|_ _  _
+    _|_| (_)| |        |~|><||_|| (/_     (_><| | (_|(_ | (_)|
+         Iron             Fixture             Extractor
+                             is
+                          handy when
+            you require complex data extracted from 
+                       crusty legacy 
+                             or 
+                           big ERP
+                          databases
+                             for
+                          test cases.
+    
 Iron fixture extractor makes extracting complex ActiveRecord dependency graphs from live databases sane.  Feed it an array of ActiveRecord objects that have preloaded associations via the .include method or just an adhoc array of ActiveRecord instances you want to capture as fixtures and it will write a bunch of fixture files for usage in your test cases.
 
 ## Installation
@@ -56,6 +56,10 @@ Fe is designed to be used in an interactive Ruby shell or Rails console.
 The idea is to poke around your data via your ActiveRecord models, then
 once you have a good dataset, use Fe.extract to load it into fixture
 files you can write tests against.
+
+This gem is dirt simple--consider reading the source code
+and test cases directly to clarify any behavioral details this readme
+doesn't cover.
 
 ### Extract
 
@@ -101,8 +105,20 @@ pulled from the fe_manifest.yml file.
   ought exist and be available in Rails context via a Railtie.  They would simply wrap the capabilities of Fe's extract, load_db, and rebuild method.
 * If you give a non-string arg to .extract, the manifest should resolve
   the .extract_code to be a bunch of look-ups by primary key ala [Post.find(1),Comment.find(2)].
- 
+* The output of each of the main commands should be meaningful, aka,
+  make extractor implement a sensible .to_s and .inspect 
+* load_db should error if Rails.env or RAILS_ENV is defined and set to
+  production
+
 ## Contributing
+To run test cases:
+
+    # clone or fork repo
+    cd iron_fixture_extractor
+    rake # runs test cases
+
+Help on the missing features above would be much appreciated per the
+usual github approach:
 
 1. Fork it
 2. Create your feature branch (`git checkout -b my-new-feature`)
@@ -110,7 +126,21 @@ pulled from the fe_manifest.yml file.
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
 
+If you have other ideas for this tool, make a Github Issue.
+
 ## Footnotes
-Before writing this Gem, I investigated the following approaches to get ideas, thanks to the authors behind these tools, blog posts, etc.
-* http://nhw.pl/wp/2009/09/24/extracting-fixtures
-  http://nhw.pl/download/extract_fixtures.rake
+I used various ideas from the following blog posts, gists, and existing
+ruby gems, thanks to the authors of these pages:
+
+http://nhw.pl/wp/2009/09/24/extracting-fixtures
+http://nhw.pl/download/extract_fixtures.rake
+https://rubygems.org/gems/fixture_builder
+https://rubygems.org/gems/fixture_dependencies
+http://topfunky.net/svn/plugins/ar_fixtures/
+https://gist.github.com/997746
+https://gist.github.com/2686783
+http://snippets.dzone.com/posts/show/4729
+http://rubygems.org/search?utf8=%E2%9C%93&query=fixture
+http://www.dan-manges.com/blog/38
+http://www.martinfowler.com/bliki/ObjectMother.html
+http://asciicasts.com/episodes/158-factories-not-fixtures
