@@ -16,8 +16,10 @@ Iron fixture extractor makes extracting complex ActiveRecord dependency graphs f
                 :;:;':               +;;''              '+'+++: 
                `:';'++.             '+''+`;            .;;;;;''.
                :,'''';;            `````````                    
+
               ~|~ _ _  _         |~. _|_   _ _      (~ _|_ _ _  __|_ _  _
               _|_| (_)| |        |~|><||_|| (/_     (_><| | (_|(_ | (_)|
+
                    Iron             Fixture             Extractor
                                        is
                                     handy when
@@ -77,7 +79,7 @@ The essense of the Fe.extract algorithm is:
     for each record given to .extract             
       recursively resolve any association pre-loaded in the .association_cache [ActiveRecord] method 
       add it to a set of records keyed by model name
-    write each set of records as .yml fixtures to 
+    write each set of records as a <model_name>.yml fixture file to test/fe_fixtures/<the :name specified to .extract>/ 
 
 The magic is all in the recursive usage of ActiveRecord::Base#association_cache.  This means, that if you do something like:
 
