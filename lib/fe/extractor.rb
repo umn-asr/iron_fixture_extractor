@@ -98,6 +98,16 @@ module Fe
     # Recursively goes over all association_cache's from the record and builds the output_hash
     # This is the meat-and-potatoes of this tool (plus the the recurse
     # method) is where something interesting is happening
+    #
+    # TODO: To work with ActiveRecord 2.3.x, we'll need to recurse using this logic: (from activerecord-2.3.14/lib/active_record/associations.rb)
+    #    # Clears out the association cache
+    #    def clear_association_cache #:nodoc:
+    #      self.class.reflect_on_all_associations.to_a.each do |assoc|
+    #        instance_variable_set "@#{assoc.name}", nil
+    #      end unless self.new_record?
+    #    end
+    #
+    #
     def recurse(record)
       raise "This gem only knows how to extract stuff w ActiveRecord" unless record.kind_of? ActiveRecord::Base
       @output_hash[record.class.to_s] ||= Set.new # Set ensures no duplicates
