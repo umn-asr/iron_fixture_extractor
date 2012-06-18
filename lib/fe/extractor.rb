@@ -10,7 +10,9 @@ module Fe
         @table_names[key] = key.constantize.table_name
       end
 
-      FileUtils.rmdir(self.target_path)
+      if File.directory?(self.target_path)
+        FileUtils.remove_dir(self.target_path,:force => true)
+      end
       FileUtils.mkdir_p(self.target_path)
       File.open(self.manifest_file_path,'w') do |file|
         file.write( {:extract_code => self.extract_code,
