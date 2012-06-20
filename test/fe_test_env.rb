@@ -1,7 +1,7 @@
 class FeTestEnv
   class << self
     def models
-      [:post,:comment,:author,:group,:group_member]
+      [:serialized_attribute_encoder,:complex_thing,:post,:comment,:author,:group,:group_member]
     end
     def model_classes
       self.models.map {|x| x.to_s.classify.constantize}
