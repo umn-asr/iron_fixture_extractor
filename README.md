@@ -59,7 +59,7 @@ doesn't cover.
 
 ### Extract
 
-    Fe.extract 'Post.includes(:comments, :author).limit(1)', name =>  'first_post_w_comments_and_authors'
+    Fe.extract 'Post.includes(:comments, :author).limit(1)', :name =>  'first_post_w_comments_and_authors'
 
 ### Load Fixtures (BE CAREFUL, THIS DELETES EVERYTHING IN THE TARGET TABLES)
 
