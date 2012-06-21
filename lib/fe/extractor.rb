@@ -135,6 +135,10 @@ module Fe
             # Array() bit done to support composite primary keys
             fixture_name = "r#{Array(record.id).join('_')}"
             hash[fixture_name] = record.attributes
+            # dump serialized attributes
+            record.serialized_attributes.each do |attr, serializer|
+              hash[fixture_name][attr] = serializer.dump(hash[fixture_name][attr])
+            end
             hash
           }.to_yaml
         end

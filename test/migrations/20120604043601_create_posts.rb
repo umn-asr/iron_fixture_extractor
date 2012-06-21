@@ -4,6 +4,7 @@ class CreatePosts < ActiveRecord::Migration
       t.belongs_to :author
       t.string :name
       t.string :content
+      t.string :serialized_thing
 
       t.timestamps
     end
