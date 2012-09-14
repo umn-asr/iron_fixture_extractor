@@ -2,6 +2,7 @@
 module Fe
   extend ActiveSupport::Autoload
   autoload :Extractor
+  require 'fe/railtie' if defined?(Rails)
 
   # global configuration
    
