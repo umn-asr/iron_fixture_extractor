@@ -11,6 +11,11 @@ module Fe
 
   # Top-level API methods
   class << self
+    # You can call this in two ways
+    #   Fe.extract('Post.all', :name => :bla)
+    #   or 
+    #   Fe.extract('[Post.all,Comment.all]', :name => :bla2)
+    #
     def extract(*args)
       extractor = Fe::Extractor.new
       extractor.load_from_args(*args)

@@ -97,8 +97,6 @@ This is just like .extract, except the code used to do the query is
 pulled from the fe_manifest.yml file.
 
 ## Missing Features
-* rake fe:fixtures:extract, fe:fixtures:load_db, and fe:fixtures:rebuild
-  ought exist and be available in Rails context via a Railtie.  They would simply wrap the capabilities of Fe's extract, load_db, and rebuild method.
 * If you give a non-string arg to .extract, the manifest should resolve
   the .extract_code to be a bunch of look-ups by primary key ala [Post.find(1),Comment.find(2)].
 * The output of each of the main commands should be meaningful, aka,

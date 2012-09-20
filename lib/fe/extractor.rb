@@ -25,6 +25,11 @@ module Fe
       self.write_model_fixtures
     end
 
+    # This is called from 2 types of invocations
+    #   Fe.extract('Post.all', :name => :bla)
+    #   or 
+    #   Fe.extract('[Post.all,Comment.all]', :name => :bla2)
+    #   
     def load_from_args(active_relation_or_array,*args)
       options = args.extract_options!
       @name = (options[:name] || Time.now.strftime("%Y_%m_%d_%H_%M_%S")).to_sym
@@ -32,17 +37,13 @@ module Fe
         @extract_code = active_relation_or_array 
         @input_array = Array(eval(active_relation_or_array)).to_a
       else
-        @extract_code = "CANNOT_REBUILD_THIS_FIXTURE_SET_USE_STRING_ARG_TO_DOT_EXTRACT_METHOD"
-        @input_array = Array(active_relation_or_array).to_a
+        raise "Extract code must be a string, so .rebuild can be called"
       end
     end
 
     def load_from_manifest
       raise "u gotta set .name to use this method" if self.name.blank?
       h = YAML.load_file(self.manifest_file_path)
-      if h[:extract_code].match /CANNOT_REBUILD_THIS_FIXTURE_SET_USE_STRING_ARG_TO_DOT_EXTRACT_METHOD/
-        h[:extract_code] = [] # To make stuff not break cause it thinks its a string
-      end
       self.load_from_args(h[:extract_code], :name => h[:name])
       @models = h[:model_names].map {|x| x.constantize}
     end
@@ -65,7 +66,13 @@ module Fe
       if @output_hash.blank?
         @output_hash = {}
         self.input_array.each do |t|
-          recurse(t)
+          if t.kind_of?(Array) || t.kind_of?(ActiveRecord::Relation)
+            t.each do |ar_object|
+              recurse(ar_object)
+            end
+          else
+            recurse(t)
+          end
         end
       end
       @output_hash
