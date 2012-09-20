@@ -3,23 +3,8 @@
 When object factories don't work because your data is too complex and creating manual fixtures is cumbersome and brittle: Iron Fixture Extractor.
 
 Iron fixture extractor makes extracting complex ActiveRecord dependency graphs from live databases sane.  Feed it an array of ActiveRecord objects that have preloaded associations via the .include method or just an adhoc array of ActiveRecord instances you want to capture as fixtures and it will write a bunch of fixture files for usage in your test cases.
-          
-                                     `###                       
-                                      ,#                        
-                                      +#,                       
-                  ;+############++++++++++++++++++++++++++++    
-                   ;                   +                  `:    
-                  ##                  +#                  ++,   
-                 .++`                 ;#;                 :+    
-                  ''                  ;+`                `;;'   
-                 ;::'                `;;.                +;;+'  
-                :;:;':               +;;''              '+'+++: 
-               `:';'++.             '+''+`;            .;;;;;''.
-               :,'''';;            `````````                    
-
               ~|~ _ _  _         |~. _|_   _ _      (~ _|_ _ _  __|_ _  _
               _|_| (_)| |        |~|><||_|| (/_     (_><| | (_|(_ | (_)|
-
                    Iron             Fixture             Extractor
                                        is
                                     handy when
@@ -51,7 +36,7 @@ namespace, we'll refer to it as "Fe" from here on out.
 Fe is designed to be used in an interactive Ruby shell or Rails console.
 The idea is to poke around your data via your ActiveRecord models, then
 once you have a good dataset, use Fe.extract to load it into fixture
-files you can write tests against.
+files you can write tests against and dynamically rebuild them later.
 
 This gem is dirt simple--consider reading the source code
 and test cases directly to clarify any behavioral details this readme
