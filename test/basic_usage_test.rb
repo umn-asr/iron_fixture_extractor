@@ -50,7 +50,7 @@ class BasicUsage < ActiveSupport::TestCase
         @extractor = Fe.extract(@extract_code, :name => @extract_name)
       end
       teardown do
-#        FeTestEnv.teardown
+        FeTestEnv.teardown
       end
       should "be able to rebuild the fixture files from the manifest" do
         # TODO: continue here, should delete a comment, then rebuild,

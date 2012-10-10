@@ -100,6 +100,18 @@ module Fe
       File.join(self.target_path,"#{model_name.constantize.table_name}.yml")
     end
 
+    def fixture_hash_for_model(model_name)
+      model_name = model_name.to_s
+      if @fixture_hashes.nil?
+        @fixture_hashes = {}
+      end
+      if @fixture_hashes.has_key?(model_name) 
+        @fixture_hashes[model_name]
+      else
+        @fixture_hashes[model_name] = YAML.load_file(self.fixture_path_for_model(model_name))
+      end
+      @fixture_hashes[model_name]
+    end
     protected
 
     # Recursively goes over all association_cache's from the record and builds the output_hash
