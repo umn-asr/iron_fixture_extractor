@@ -11,6 +11,7 @@ module Fe
 
   # Top-level API methods
   class << self
+    # Extract a set up Yml for one or more active relation alls
     # You can call this in two ways
     #   Fe.extract('Post.all', :name => :bla)
     #   or 
@@ -23,6 +24,8 @@ module Fe
       extractor
     end
 
+    # Insert fixtures into tables from the yml files in the
+    # "extract_name" fixture set
     # NOTE: This is destructive, it will delete everything in the target table
     #
     def load_db(extract_name)
@@ -32,6 +35,9 @@ module Fe
       extractor.load_into_database
       extractor
     end
+
+    # Rebuilds an existing fixture set from a fe_manifest.yml
+    #
     def rebuild(extract_name)
       extractor = Fe::Extractor.new
       extractor.name = extract_name
@@ -40,6 +46,15 @@ module Fe
       extractor
     end
 
+
+    # Used if you want to get a hash representation of a particular
+    # fixture in a fixture set for a given model
+    #
+    # Used like
+    #   h = Fe.get_hash(:first_post_w_comments_and_authors, Post, 'r1')
+    # => {:id => 1, :name => 'first post', ....}
+    # in the console
+    # or in a factory declaration
     def get_hash(extract_name, model_name, fixture_name)
       model_name = model_name.to_s 
       extractor = Fe::Extractor.new
