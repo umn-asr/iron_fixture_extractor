@@ -24,7 +24,7 @@ class BasicUsage < ActiveSupport::TestCase
         assert File.exists?(File.join(Fe.fixtures_root,'first_post_w_comments_and_authors',"#{Post.table_name}.yml")), "The file is created"
       end
     end
-    context ".load_db" do
+    context ".load_db, .execute_extract_code" do
       setup do
         FeTestEnv.setup # regular production db
         extract_hash = Fe.extract(@extract_code, :name => @extract_name)
@@ -42,6 +42,12 @@ class BasicUsage < ActiveSupport::TestCase
         assert_equal 1, Post.count
         assert_equal 1, Comment.count
         assert_equal 1, Author.count
+      end
+      should "provide the ability to execute the same query that built the fixtures" do
+        Fe.load_db(@extract_name)
+        rows = Fe.execute_extract_code(:first_post_w_comments_and_authors)
+        assert_equal 1, rows.length
+        assert (rows.first.association_cache.keys - [:comments,:author]).empty?, "Comments and authors should be eager loaded"
       end
     end
     context ".rebuild" do
@@ -67,21 +73,33 @@ class BasicUsage < ActiveSupport::TestCase
         #assert_equal 0, Post.count
       end
     end
+
+    context ".truncate_tables_for" do
+      setup do
+        FeTestEnv.setup # regular production db
+        extract_hash = Fe.extract(@extract_code, :name => @extract_name)
+        FeTestEnv.the_env = 'fake_test'
+        FeTestEnv.recreate_schema_without_data
+      end
+      teardown do
+        FeTestEnv.teardown
+      end
+      should "truncate only the tables in the fixture set" do
+        Group.create
+        assert_equal 1, Group.count
+
+        Fe.load_db(@extract_name)
+        assert_equal 1, Post.count
+        assert_equal 1, Comment.count
+        assert_equal 1, Author.count
+
+        Fe.truncate_tables_for(@extract_name)
+        assert_equal 1, Group.count
+        assert_equal 0, Post.count
+        assert_equal 0, Comment.count
+        assert_equal 0, Author.count
+
+      end
+    end
   end
-  # NOT SURE IF THESE MATTER, probably do..commented out for now
-  #context "2nd tier API" do
-    #should "provide an extractor class" do
-      #extract_code = Post.first
-      #e=Fe::Extractor.new
-      #e.input_array = [extract_code]
-      #assert_kind_of Hash, e.output_hash
-      #assert_equal Post, e.output_hash.keys.first
-      #assert_equal extract_code, e.output_hash[Post].first
-    #end
-    #should "work with recursive loading" do
-      #e=Fe::Extractor.new
-      #e.input_array = Post.includes(:comments, :author)
-      #assert (e.output_hash.keys - [Post,Comment,Author]).empty?, "There are only keys for the eager loaded models"
-    #end
-  #end
 end

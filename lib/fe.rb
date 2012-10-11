@@ -72,5 +72,31 @@ module Fe
 
       h[fixture_name]
     end
+
+    def execute_extract_code(extract_name)
+      extractor = Fe::Extractor.new
+      extractor.name = extract_name
+      extractor.load_from_manifest
+      extractor.load_input_array_by_executing_extract_code
+      extractor.input_array
+    end
+
+
+    def truncate_tables_for(extract_name)
+      extractor = Fe::Extractor.new
+      extractor.name = extract_name
+      extractor.load_from_manifest
+      extractor.models.each do |model|
+        case ActiveRecord::Base.connection.adapter_name
+        when /mysql|oracle|postgresql/i
+          # Its dumb that this isn't in active record natively
+          # https://github.com/rails/rails/issues/5510
+          ActiveRecord::Base.connection.execute("truncate table #{model.table_name}")
+        else
+          model.delete_all
+        end
+      end
+      true
+    end
   end
 end

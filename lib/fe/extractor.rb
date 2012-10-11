@@ -3,6 +3,7 @@ module Fe
     attr_accessor :input_array, :extract_code, :name, :row_counts,:table_names
 
     def extract
+      load_input_array_by_executing_extract_code
       @row_counts = {}
       @table_names = {}
       self.output_hash.each_pair do |key,records|
@@ -35,19 +36,27 @@ module Fe
       @name = (options[:name] || Time.now.strftime("%Y_%m_%d_%H_%M_%S")).to_sym
       if active_relation_or_array.kind_of? String
         @extract_code = active_relation_or_array 
-        @input_array = Array(eval(active_relation_or_array)).to_a
       else
         raise "Extract code must be a string, so .rebuild can be called"
       end
     end
 
+    def load_input_array_by_executing_extract_code
+      @input_array = Array(eval(@extract_code)).to_a
+    end
+
     def load_from_manifest
       raise "u gotta set .name to use this method" if self.name.blank?
       h = YAML.load_file(self.manifest_file_path)
-      self.load_from_args(h[:extract_code], :name => h[:name])
+      @extract_code = h[:extract_code]
+      @name = h[:name]
+      #self.load_from_args(h[:extract_code], :name => h[:name])
       @models = h[:model_names].map {|x| x.constantize}
     end
 
+    # Loads data from each fixture file in the extract set using
+    # ActiveRecord::Fixtures
+    #
     def load_into_database
       # necessary to make multiple invocations possible in a single test
       # case possible
