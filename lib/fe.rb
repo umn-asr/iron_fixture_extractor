@@ -73,6 +73,8 @@ module Fe
       h[fixture_name]
     end
 
+    # Execute the ActiveRecord query associated with the extract set
+    #
     def execute_extract_code(extract_name)
       extractor = Fe::Extractor.new
       extractor.name = extract_name
@@ -82,6 +84,8 @@ module Fe
     end
 
 
+    # Truncate all tables referenced in an extract set
+    #
     def truncate_tables_for(extract_name)
       extractor = Fe::Extractor.new
       extractor.name = extract_name
