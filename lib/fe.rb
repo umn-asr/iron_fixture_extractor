@@ -2,6 +2,7 @@
 module Fe
   extend ActiveSupport::Autoload
   autoload :Extractor
+  autoload :FactoryGirlDslMethods
   require 'fe/railtie' if defined?(Rails)
 
   # global configuration
@@ -102,5 +103,10 @@ module Fe
       end
       true
     end
+
+    def augment_factory_girl!
+      FactoryGirl::Syntax::Default::DSL.send(:include, Fe::FactoryGirlDslMethods)
+    end
   end
 end
+
