@@ -63,6 +63,28 @@ module Fe
       ActiveRecord::Fixtures.reset_cache
       self.models.each do |model|
         ActiveRecord::Fixtures.create_fixtures(self.target_path, model.table_name)
+        case ActiveRecord::Base.connection.adapter_name
+        when /oracle/i
+          if model.column_names.include? "id"
+            count = model.count
+            sequence_name = model.sequence_name.to_s
+            max_id = model.maximum(:id)
+            next_id = max_id.nil? ? 1 : max_id.to_i + 1
+            begin
+              ActiveRecord::Base.connection.execute("drop sequence #{sequence_name}")
+            rescue
+              puts "[Iron Fixture Extractor] WARNING: couldnt drop the sequence #{sequence_name}, (but who cares!)"
+            end
+            begin
+              q="create sequence #{sequence_name} increment by 1 start with #{next_id}"
+              ActiveRecord::Base.connection.execute(q)
+            rescue
+              puts "[Iron Fixture Extractor] WARNING: couldnt create the sequence #{sequence_name}"
+            end
+          end
+        else
+          # Do nothing, only oracle adapters need this
+        end
       end
     end
     # Returns a hash with model class names for keys and Set's of AR
