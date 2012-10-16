@@ -55,7 +55,16 @@ module Fe
     #   h = Fe.get_hash(:first_post_w_comments_and_authors, Post, 'r1')
     # => {:id => 1, :name => 'first post', ....}
     # in the console
-    # or in a factory declaration
+    # or in a factory declaration like this
+    #
+    #   FactoryGirl.define do
+    #     factory :fe4,
+    #       :class => Post,
+    #       &Fe.get_hash(:first_post_w_comments_and_authors,Post,"r1").to_factory_girl_string.to_proc
+    #   end
+    #
+    # Kinda meta, but somewhat useful
+    #
     def get_hash(extract_name, model_name, fixture_name)
       model_name = model_name.to_s 
       extractor = Fe::Extractor.new
@@ -64,14 +73,31 @@ module Fe
       begin
         h=extractor.fixture_hash_for_model(model_name)
       rescue Exception => e
-        raise "Fe::Extractor#fixture_hash_for_model broke on #{model_name}"
+        raise "Fe::Extractor#fixture_hash_for_model broke on #{model_name}, perhaps the yml file does exist?"
       end
       raise "#{h.inspect} Fe::Extractor#fixture_hash_for_model did not return a hash (broken fixture file)" unless h.kind_of? Hash
 
       fixture_path_for_model = extractor.fixture_path_for_model(model_name)
       raise "Fixture of the name #{fixture_name} did not exist in in #{fixture_path_for_model}" unless h.has_key?(fixture_name)
 
-      h[fixture_name]
+      a_hash = h[fixture_name]
+      a_hash.define_singleton_method(:to_factory_girl_string) do
+        s=<<-EOS
+        x = #{model_name}.new(Fe.get_hash(:#{extract_name},#{model_name},"#{fixture_name}"))
+        EOS
+        model_name.constantize.column_names.each do |col|
+          s << "#{col} x.#{col}\n"
+        end
+        s.instance_eval do
+          def to_proc
+            Proc.new {
+              self
+            }
+          end
+        end
+        s
+      end
+      a_hash
     end
 
     # Execute the ActiveRecord query associated with the extract set

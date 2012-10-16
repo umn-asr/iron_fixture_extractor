@@ -6,41 +6,67 @@ class FactoryGirlTest < ActiveSupport::TestCase
     @extract_code = 'Post.includes(:comments, :author).limit(1)'
     @extract_name = :first_post_w_comments_and_authors
     FeTestEnv.setup # regular production db
-    extract_hash = Fe.extract(@extract_code, :name => @extract_name)
+    Fe.extract(@extract_code, :name => @extract_name) # build fixture yml
     FeTestEnv.the_env = 'fake_test'
     FeTestEnv.recreate_schema_without_data
 
     @post_hash = Fe.get_hash(:first_post_w_comments_and_authors, Post,"r1")
-    @instantiated_post_from_fe = Post.new(@post_hash)
 
-    a_block = Proc.new {
-      name "Block meta"
-    }
-    Fe.augment_factory_girl!
-    FactoryGirl.define do
-      factory :fe1, :class => Post
-      factory :fe2, :class => Post, &a_block
-      fe_factory :fe3, 
-        :class => Post, 
-        :extract_name => :first_post_w_comments_and_authors,
-        :fixture_name => "r1"
-    end
+
   end
-  should "work" do
+  should "expose a .to_factory_girl_string method" do
     assert_kind_of Hash, @post_hash
+    assert_respond_to @post_hash, :to_factory_girl_string
+    assert !Hash.instance_methods.include?(:to_factory_girl_string)
 
-    assert_kind_of Post, @instantiated_post_from_fe
-    assert @instantiated_post_from_fe.new_record?
-    assert @instantiated_post_from_fe.new_record?
+    @fg_string = @post_hash.to_factory_girl_string
+    assert_match /Post/, @fg_string, "The string should have the model name on the first line"
+  end
 
-    @regular_created_factory = FactoryGirl.create(:fe1)
-    assert_kind_of Post, @regular_created_factory
+  should ".to_factory_girl_string should return a monkey patched string implementing .to_proc" do
+    @fg_string = @post_hash.to_factory_girl_string
+    assert_respond_to @fg_string, :to_proc
+    puts @fg_string
+  end
 
-    @cheezy_way_fe_factory = FactoryGirl.create(:fe2)
-    assert_equal "Block meta", @cheezy_way_fe_factory.name
+  should "be just like a factory produced in a non-meta way" do
+    FactoryGirl.define do
+      # This is the essense of the code that .to_factory_girl_string spits out
+      factory :fe2, :class => Post do
+        x = Post.new(Fe.get_hash(:first_post_w_comments_and_authors,Post,"r1"))
+        id x.id
+        author_id x.author_id
+        name x.name
+        content x.content
+        serialized_thing x.serialized_thing
+        created_at x.created_at
+        updated_at x.updated_at
+      end
 
-    @fe_created_factory = FactoryGirl.create(:fe3)
-    assert_kind_of Post, @fe_created_factory
+      # We are evaluating the to_factory_girl_string in the block context factory girl
+      # if you wanted to override settings you could do so afterwords
+      factory :fe3, :class => Post, &Proc.new {
+        self.instance_eval(Fe.get_hash(:first_post_w_comments_and_authors,Post,"r1").to_factory_girl_string)
+        # I think You could override attributes set in the fixture here, like:
+        # name "poo poo"
+      }
+
+      # This is two levels meta-ness away
+      factory :fe4,
+        :class => Post,
+        &Fe.get_hash(:first_post_w_comments_and_authors,Post,"r1").to_factory_girl_string.to_proc
+    end
+
+    @fe2 = FactoryGirl.create(:fe2)
+    assert_kind_of Post, @fe2
+
+    @fe3 = FactoryGirl.create(:fe3)
+    assert_kind_of Post, @fe3
+    assert_kind_of Time, @fe3.updated_at, "Objects get the right type"
+
+    @fe4 = FactoryGirl.create(:fe4)
+    assert_kind_of Post, @fe4
+    assert_kind_of Time, @fe4.updated_at, "Objects get the right type"
   end
   teardown do
     FeTestEnv.teardown
