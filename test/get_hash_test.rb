@@ -18,6 +18,13 @@ class GetHashTest < ActiveSupport::TestCase
           assert_equal 1, h["id"]
           assert_equal "First post", h["name"]
           assert_equal "ComplexThing", h["serialized_thing"]
+
+          # allow :first to grab the first fixture, so you don't have to know the name
+          h2 = Fe.get_hash(:first_post_w_comments_and_authors, Post, :first)
+          assert_equal h, h2
+
+          h3 = Fe.get_hash(:first_post_w_comments_and_authors, Post, :last)
+          assert_equal h, h3, "there is only one fixture in this set to last is the same as first"
         end
       end
     end

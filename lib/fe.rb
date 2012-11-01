@@ -78,9 +78,23 @@ module Fe
       raise "#{h.inspect} Fe::Extractor#fixture_hash_for_model did not return a hash (broken fixture file)" unless h.kind_of? Hash
 
       fixture_path_for_model = extractor.fixture_path_for_model(model_name)
-      raise "Fixture of the name #{fixture_name} did not exist in in #{fixture_path_for_model}" unless h.has_key?(fixture_name)
 
-      a_hash = h[fixture_name]
+      if fixture_name.kind_of? Symbol
+        case fixture_name
+        when :first
+          a_hash = h.to_a.first.last
+        when :last
+          a_hash = h.to_a.last.last
+        else
+          raise "symbols can be :first or :last"
+        end
+      elsif fixture_name.kind_of? String
+        raise "Fixture of the name #{fixture_name} did not exist in in #{fixture_path_for_model}" unless h.has_key?(fixture_name)
+        a_hash = h[fixture_name]
+      else
+        raise "fixture name must be a string or a symbol like :first or :laset"
+      end
+      require 'debugger'; debugger; puts 's' 
       a_hash.define_singleton_method(:to_factory_girl_string) do
         s=<<-EOS
         x = #{model_name}.new(Fe.get_hash(:#{extract_name},#{model_name},"#{fixture_name}"))
