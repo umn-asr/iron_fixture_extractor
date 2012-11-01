@@ -94,7 +94,6 @@ module Fe
       else
         raise "fixture name must be a string or a symbol like :first or :laset"
       end
-      require 'debugger'; debugger; puts 's' 
       a_hash.define_singleton_method(:to_factory_girl_string) do
         s=<<-EOS
         x = #{model_name}.new(Fe.get_hash(:#{extract_name},#{model_name},"#{fixture_name}"))
