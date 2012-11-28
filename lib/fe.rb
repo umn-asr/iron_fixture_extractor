@@ -1,5 +1,6 @@
 # NOTE: require 'iron_fixture_extractor', NOT this file
 module Fe
+  class InvalidSourceModelToMapFrom < Exception; end
   extend ActiveSupport::Autoload
   autoload :Extractor
   autoload :FactoryGirlDslMethods
@@ -27,12 +28,19 @@ module Fe
 
     # Insert fixtures into tables from the yml files in the
     # "extract_name" fixture set
+    # If you specify a map_models hash here for the last arg like
+    #   Post => DifferentPost
+    # It will load the fixtures into a different table than whats listed
+    # in the manifest
     # NOTE: This is destructive, it will delete everything in the target table
     #
-    def load_db(extract_name)
+    def load_db(extract_name, map_models={})
       extractor = Fe::Extractor.new
       extractor.name = extract_name
       extractor.load_from_manifest
+      unless map_models.empty?
+        extractor.map_models_hash = map_models
+      end
       extractor.load_into_database
       extractor
     end

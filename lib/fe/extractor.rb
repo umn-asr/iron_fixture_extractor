@@ -54,6 +54,22 @@ module Fe
       @models = @manifest_hash[:model_names].map {|x| x.constantize}
     end
 
+    def map_models_hash=(map_models_hash)
+      unless (map_models_hash.keys - self.models).empty?
+        raise InvalidSourceModelToMapFrom.new "your map models hash must contain keys representing class names that exist in the fe_manifest.yml"
+      end
+      @map_models_hash = map_models_hash
+    end
+
+    def map_models_hash
+      if @map_models_hash.nil?
+        {}
+      else
+        @map_models_hash
+      end
+    end
+
+
     # Loads data from each fixture file in the extract set using
     # ActiveRecord::Fixtures
     #
@@ -62,7 +78,13 @@ module Fe
       # case possible
       ActiveRecord::Fixtures.reset_cache
       self.models.each do |model|
-        ActiveRecord::Fixtures.create_fixtures(self.target_path, model.table_name)
+        if self.map_models_hash.has_key?(model)
+          raise "Unfortunately, this is not implemented...from the implementation of .create_fixtures it seems impossible...keeping this code in case its not"
+          h = {model.table_name => self.map_models_hash[model]}
+          ActiveRecord::Fixtures.create_fixtures(self.target_path, model.table_name, h)
+        else
+          ActiveRecord::Fixtures.create_fixtures(self.target_path, model.table_name)
+        end
         case ActiveRecord::Base.connection.adapter_name
         when /oracle/i
           if model.column_names.include? "id"
