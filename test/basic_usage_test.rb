@@ -21,6 +21,7 @@ class BasicUsage < ActiveSupport::TestCase
         assert File.exists?(File.join(Fe.fixtures_root,'first_post_w_comments_and_authors','fe_manifest.yml')), "The file that allows the fixtures to get rebuilt"
         assert_equal 1, extractor.row_counts['Post']
         assert_equal 1, extractor.row_counts['Author']
+        assert_kind_of Hash, extractor.manifest_hash
         assert File.exists?(File.join(Fe.fixtures_root,'first_post_w_comments_and_authors',"#{Post.table_name}.yml")), "The file is created"
       end
     end

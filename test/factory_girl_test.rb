@@ -1,3 +1,7 @@
+# WARNING: THIS IS AN EXPERIMENTAL FEATURE THAT ISN'T QUITE COMPLETE AND MIGHT BE DEPRECATED
+# WARNING: THIS IS AN EXPERIMENTAL FEATURE THAT ISN'T QUITE COMPLETE AND MIGHT BE DEPRECATED
+# WARNING: THIS IS AN EXPERIMENTAL FEATURE THAT ISN'T QUITE COMPLETE AND MIGHT BE DEPRECATED
+# WARNING: THIS IS AN EXPERIMENTAL FEATURE THAT ISN'T QUITE COMPLETE AND MIGHT BE DEPRECATED
 require 'test_helper'
 require 'factory_girl'
 class FactoryGirlTest < ActiveSupport::TestCase
@@ -26,7 +30,6 @@ class FactoryGirlTest < ActiveSupport::TestCase
   should ".to_factory_girl_string should return a monkey patched string implementing .to_proc" do
     @fg_string = @post_hash.to_factory_girl_string
     assert_respond_to @fg_string, :to_proc
-    puts @fg_string
   end
 
   should "be just like a factory produced in a non-meta way" do

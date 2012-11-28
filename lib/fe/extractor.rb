@@ -1,6 +1,6 @@
 module Fe
   class Extractor
-    attr_accessor :input_array, :extract_code, :name, :row_counts,:table_names
+    attr_accessor :input_array, :extract_code, :name, :row_counts,:table_names, :manifest_hash
 
     def extract
       load_input_array_by_executing_extract_code
@@ -15,13 +15,14 @@ module Fe
         FileUtils.remove_dir(self.target_path,:force => true)
       end
       FileUtils.mkdir_p(self.target_path)
+      @manifest_hash = {:extract_code => self.extract_code,
+                        :name => self.name,
+                        :model_names => self.model_names,
+                        :row_counts => self.row_counts,
+                        :table_names => self.models.map {|m| m.table_name}
+                       }
       File.open(self.manifest_file_path,'w') do |file|
-        file.write( {:extract_code => self.extract_code,
-                    :name => self.name,
-                    :model_names => self.model_names,
-                    :row_counts => self.row_counts,
-                    :table_names => self.models.map {|m| m.table_name}
-                    }.to_yaml)
+        file.write(@manifest_hash.to_yaml)
       end
       self.write_model_fixtures
     end
@@ -47,11 +48,10 @@ module Fe
 
     def load_from_manifest
       raise "u gotta set .name to use this method" if self.name.blank?
-      h = YAML.load_file(self.manifest_file_path)
-      @extract_code = h[:extract_code]
-      @name = h[:name]
-      #self.load_from_args(h[:extract_code], :name => h[:name])
-      @models = h[:model_names].map {|x| x.constantize}
+      @manifest_hash = YAML.load_file(self.manifest_file_path)
+      @extract_code = @manifest_hash[:extract_code]
+      @name = @manifest_hash[:name]
+      @models = @manifest_hash[:model_names].map {|x| x.constantize}
     end
 
     # Loads data from each fixture file in the extract set using
@@ -160,8 +160,9 @@ module Fe
     #
     def recurse(record)
       raise "This gem only knows how to extract stuff w ActiveRecord" unless record.kind_of? ActiveRecord::Base
-      @output_hash[record.class.to_s] ||= Set.new # Set ensures no duplicates
-      @output_hash[record.class.to_s].add record 
+      key = record.class.base_class.to_s # the base_class is key for correctly handling STI
+      @output_hash[key] ||= Set.new # Set ensures no duplicates
+      @output_hash[key].add record
       record.association_cache.each do |assoc_cache|
         assoc_name = assoc_cache.first
         assoc_value = assoc_cache.last.target

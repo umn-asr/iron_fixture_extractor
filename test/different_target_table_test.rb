@@ -15,6 +15,7 @@ class DfferentTargetTableTest < ActiveSupport::TestCase
     assert_equal 0, Post.count
     assert_equal 0, ::DifferentPost.count
     Fe.load_db(@extract_name)
+
     puts "TODO: CONTINUE HERE WITH BUILDING THE CODE TO MAKE THE FOLLOWING 2 ASSERT STATEMENTS PASS"
     #assert_equal 0, Post.count
     #assert_equal 1, DifferentPost.count

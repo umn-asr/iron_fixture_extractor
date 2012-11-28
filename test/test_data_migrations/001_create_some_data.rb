@@ -10,5 +10,8 @@ class CreateSomeData < ActiveRecord::Migration
     g=Group.create :name => "Group 1"
     g.authors << a2
     g.save
+
+    User::Jerk.create(:name => "Jimmy the jerk")
+    User::Admin.create(:name => "Ron the admin")
   end
 end

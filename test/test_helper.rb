@@ -7,4 +7,5 @@ require 'iron_fixture_extractor'
 require 'sqlite3'
 #require 'ruby-debug'
 require 'fe_test_env'
+ActiveRecord::Migration.verbose = false
 FeTestEnv.reload
