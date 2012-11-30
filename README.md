@@ -129,3 +129,6 @@ ruby gems, thanks to the authors of these pages:
 * http://www.dan-manges.com/blog/38
 * http://www.martinfowler.com/bliki/ObjectMother.html
 * http://asciicasts.com/episodes/158-factories-not-fixtures
+
+## Author
+Joe Goggins
