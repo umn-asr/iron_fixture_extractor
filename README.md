@@ -35,14 +35,27 @@ How it works:
 
     Fe.truncate_tables_for(:first_post_w_comments_and_authors)
 
-### Pull up a hash from a particular fixture file (very handy in test cases)
+### Pull up a hash from a particular fixture file (very handy)
+
     # 'r1' is the fixture's name, all fixture names start with 'r', 1 is the id
     Fe.get_hash(:first_post_w_comments_and_authors, Post, 'r1')
 
     # You can specify :first, or :last to the last arg
     Fe.get_hash(:first_post_w_comments_and_authors, Post, :first)
 
+This feature is used to instantiate objects from the hash or define factories like:
 
+    # Create factory from a particular hash within a fixture file
+    Factory.create(:the_post) do
+      h=Fe.get_hash(:first_post_w_comments_and_authors, Post, :first)
+      name h.name
+    end
+
+    or
+
+    # Create an instance
+    h=Fe.get_hash(:first_post_w_comments_and_authors, Post, :first)
+    ye_old_post=Post.new(h)
 
 ### 
 ## Installation
