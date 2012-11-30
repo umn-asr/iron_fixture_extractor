@@ -88,6 +88,10 @@ pulled from the fe_manifest.yml file.
   make extractor implement a sensible .to_s and .inspect 
 * load_db should error if Rails.env or RAILS_ENV is defined and set to
   production
+* An :extract_schema option passed to .extract that uses `rake db:structure:dump` functionality 
+  or ActiveRecord::Base.connection.structure_dump to create .sql files containing a "create table" statement
+  for each distinct model class.  This would allow you to completely de-couple your test cases + fixtures
+  from the external databases they were extracted from.
 
 ## Contributing
 To run test cases:
