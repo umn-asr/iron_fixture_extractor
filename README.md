@@ -1,21 +1,36 @@
-# About
+# About Iron Fixture Extractor
 
-When object factories don't work because your data is too complex and creating manual fixtures is cumbersome and brittle: Iron Fixture Extractor.
+For extracting complex data from staging and production databases to be used for automated testing (works great with whatever testing framework your using).
 
-Iron fixture extractor makes extracting complex ActiveRecord dependency graphs from live databases sane.  Feed it an array of ActiveRecord objects that have preloaded associations via the .include method or just an adhoc array of ActiveRecord instances you want to capture as fixtures and it will write a bunch of fixture files for usage in your test cases.
-              ~|~ _ _  _         |~. _|_   _ _      (~ _|_ _ _  __|_ _  _
-              _|_| (_)| |        |~|><||_|| (/_     (_><| | (_|(_ | (_)|
-                   Iron             Fixture             Extractor
-                                       is
-                                    handy when
-                      you require complex data extracted from 
-                                 crusty legacy 
-                                       or 
-                                     big ERP
-                                    databases
-                                       for
-                                    test cases.
-    
+Its best when:
+* your data is too complex for factories (like when integrating with legacy systems, ERP systems, etc)
+* creating and maintaining manual fixtures is cumbersome and brittle (always, :))
+
+Its good for:
+
+  Pulling data from a staging database containing vetted data that has
+  been built up by the development team, users, or business analysts to be used
+  as "archetypical" data structures in test cases, demonstration.
+
+  Taking snapshots of production data that has triggered unexpected errors to be incorporated into test cases for closer inspection and correction.
+
+How it works:
+
+  Feed it an array of ActiveRecord objects or ActiveRelation object and it will allow you to extract, load, and rebuild the records associated with your queries.
+
+## Usage (typically in a console)
+### Extract (fixture files)
+
+    Fe.extract 'Post.includes(:comments, :author).limit(1)', :name =>  'first_post_w_comments_and_authors'
+
+### Load (dataset into database)
+
+    Fe.load_db(:first_post_w_comments_and_authors)
+
+### Rebuild (fixture files associated with the initial extraction)
+
+    Fe.rebuild(:first_post_w_comments_and_authors)
+
 ## Installation
 Add this line to your application's Gemfile:
 
@@ -29,57 +44,15 @@ Or install it yourself as:
 
     $ gem install iron_fixture_extractor
 
-## Usage
-The Iron Fixture Extractor gem exposes everything under the Fe
-namespace, we'll refer to it as "Fe" from here on out.
-
-Fe is designed to be used in an interactive Ruby shell or Rails console.
-The idea is to poke around your data via your ActiveRecord models, then
-once you have a good dataset, use Fe.extract to load it into fixture
-files you can write tests against and dynamically rebuild them later.
-
-This gem is dirt simple--consider reading the source code
-and test cases directly to clarify any behavioral details this readme
-doesn't cover.
-
 ### Extract
+The essense of the Fe.extract is dirt simple:
 
-    Fe.extract 'Post.includes(:comments, :author).limit(1)', :name =>  'first_post_w_comments_and_authors'
-
-### Load Fixtures (BE CAREFUL, THIS DELETES EVERYTHING IN THE TARGET TABLES)
-
-    Fe.load_db(:first_post_w_comments_and_authors)
-
-### Rebuild Fixture Files
-This uses the fe_manifest.yml's extract_code to re-extract fixtures
-using the same code used to initially create them.  Its handy when the live data changes and you want to refresh the fixture files to reflect it.
-
-    Fe.rebuild(:first_post_w_comments_and_authors)
-
-## How it works
-
-### Extract
-The essense of the Fe.extract algorithm is:
-
-    for each record given to .extract             
-      recursively resolve any association pre-loaded in the .association_cache [ActiveRecord] method 
+    for each record given to Fe.extract
+      recursively resolve any association pre-loaded in the .association_cache [ActiveRecord] method
       add it to a set of records keyed by model name
-    write each set of records as a <model_name>.yml fixture file to test/fe_fixtures/<the :name specified to .extract>/ 
+    write each set of records as a <TheModel.table_name>.yml fixture
+    write a fe_manifest.yml that will allow you to later change the query, inspect row counts, and rebuild the fixtures by re-executing the originate queries
 
-The magic is all in the recursive usage of ActiveRecord::Base#association_cache.  This means, that if you do something like:
-
-    p=Post.first
-    p.comments
-    Fe.extract(p)
-
-you will get 2 fixture files: 1 post record fixture (not-surprising) and N comment fixtures because p.association_cache is populated for :comments on the post instance p.
-
-### Load Fixtures
-This uses the same mechanism as Rails' `rake db:fixtures:load`, aka ActiveRecord::Fixtures.create_fixtures method
-
-### Rebuild Fixture Files
-This is just like .extract, except the code used to do the query is
-pulled from the fe_manifest.yml file.
 
 ## Missing Features
 * If you give a non-string arg to .extract, the manifest should resolve
@@ -105,9 +78,11 @@ usual github approach:
 
 1. Fork it
 2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Added some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create new Pull Request
+3. Ensure the test cases run
+4. Copy one of the test cases (like basic_test.rb), rename, rip out the guts, and add some tests + code to the app
+5. Commit your changes (`git commit -am 'Added some feature'`)
+6. Push to the branch (`git push origin my-new-feature`)
+7. Create new Pull Request
 
 If you have other ideas for this tool, make a Github Issue.
 
