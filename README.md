@@ -81,11 +81,11 @@ The essense of the Fe.extract is dirt simple:
     write a fe_manifest.yml that will allow you to later change the query, inspect row counts, and rebuild the fixtures by re-executing the originate queries
 
 ## Compatibility
-* Primarily tested on MRI 1.9.3
-* Does not work on JRuby
+* Works on MRI 1.9.3 and 1.9.2
+* Does not work on JRuby, 1.8.7
 
 ## Feature Wishlist
-* Get this to work other Ruby platforms like JRuby: jigger the Gemfile, .gemspec, and
+* Get this to work on JRuby: jigger the Gemfile, .gemspec, and
   test_helper.rb
 * If you give a non-string arg to .extract, the manifest should resolve
   the .extract_code to be a bunch of look-ups by primary key ala [Post.find(1),Comment.find(2)].
