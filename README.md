@@ -18,26 +18,33 @@ How it works:
 
   Feed it an array of ActiveRecord objects or ActiveRelation object and it will allow you to extract, load, and rebuild the records associated with your queries.
 
-## Usage (typically in a console)
-### Extract (fixture files)
+## Usage
+### Extract (fixture files, typically run in an irb/"rails console")
 
     Fe.extract 'Post.includes(:comments, :author).limit(1)', :name =>  'first_post_w_comments_and_authors'
 
-### Load (dataset into database)
+### Load (dataset into database, typically run in a "setup" test method )
 
     Fe.load_db(:first_post_w_comments_and_authors)
 
-### Rebuild (fixture files associated with the initial extraction)
+### Rebuild (fixture files associated with the initial extraction, typically via rake task (in Rails))
 
     Fe.rebuild(:first_post_w_comments_and_authors)
 
-### Pull up a hash from a particular fixture file (very handy in test cases)
-    Fe.get_hash(:first_post_w_comments_and_authors, Post, 'r1')
-    or
-    Fe.get_hash(:first_post_w_comments_and_authors, Post, :first)
-    or 
-    Fe.get_hash(:first_post_w_comments_and_authors, Post, :last)
+### Truncate tables (associated with a fixture set...if you're not using DatabaseCleaner)
 
+    Fe.truncate_tables_for(:first_post_w_comments_and_authors)
+
+### Pull up a hash from a particular fixture file (very handy in test cases)
+    # 'r1' is the fixture's name, all fixture names start with 'r', 1 is the id
+    Fe.get_hash(:first_post_w_comments_and_authors, Post, 'r1')
+
+    # You can specify :first, or :last to the last arg
+    Fe.get_hash(:first_post_w_comments_and_authors, Post, :first)
+
+
+
+### 
 ## Installation
 Add this line to your application's Gemfile:
 
