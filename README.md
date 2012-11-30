@@ -41,7 +41,7 @@ How it works:
     Fe.get_hash(:first_post_w_comments_and_authors, Post, 'r1')
 
     # You can specify :first, or :last to the last arg
-    Fe.get_hash(:first_post_w_comments_and_authors, Post, :first)
+    Fe.get_hash(:first_post_w_comments_and_authors, Comment, :first)
 
 This feature is used to instantiate objects from the hash or define factories like:
 
@@ -80,8 +80,13 @@ The essense of the Fe.extract is dirt simple:
     write each set of records as a <TheModel.table_name>.yml fixture
     write a fe_manifest.yml that will allow you to later change the query, inspect row counts, and rebuild the fixtures by re-executing the originate queries
 
+## Compatibility
+* Primarily tested on MRI 1.9.3
+* Does not work on JRuby
 
-## Missing Features
+## Feature Wishlist
+* Get this to work other Ruby platforms like JRuby: jigger the Gemfile, .gemspec, and
+  test_helper.rb
 * If you give a non-string arg to .extract, the manifest should resolve
   the .extract_code to be a bunch of look-ups by primary key ala [Post.find(1),Comment.find(2)].
 * The output of each of the main commands should be meaningful, aka,

@@ -18,5 +18,4 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency "activesupport", "~> 3.2.1"
   gem.add_development_dependency "shoulda", "~> 3.0.1"
   gem.add_development_dependency "sqlite3"
-  gem.add_development_dependency "factory_girl"
 end
