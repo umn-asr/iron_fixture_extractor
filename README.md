@@ -31,6 +31,13 @@ How it works:
 
     Fe.rebuild(:first_post_w_comments_and_authors)
 
+### Pull up a hash from a particular fixture file (very handy in test cases)
+    Fe.get_hash(:first_post_w_comments_and_authors, Post, 'r1')
+    or
+    Fe.get_hash(:first_post_w_comments_and_authors, Post, :first)
+    or 
+    Fe.get_hash(:first_post_w_comments_and_authors, Post, :last)
+
 ## Installation
 Add this line to your application's Gemfile:
 
