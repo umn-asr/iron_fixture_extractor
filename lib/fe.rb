@@ -93,6 +93,8 @@ module Fe
           a_hash = h.to_a.first.last
         when :last
           a_hash = h.to_a.last.last
+        when :all
+          a_hash = h
         else
           raise "symbols can be :first or :last"
         end
@@ -102,6 +104,8 @@ module Fe
       else
         raise "fixture name must be a string or a symbol like :first or :laset"
       end
+
+      # TODO: THIS IS NASTY META-CRAP...consider refactor
       a_hash.define_singleton_method(:to_factory_girl_string) do
         s=<<-EOS
         x = #{model_name}.new(Fe.get_hash(:#{extract_name},#{model_name},"#{fixture_name}"))
@@ -121,6 +125,9 @@ module Fe
       a_hash
     end
 
+    def get_hashes(extract_name, model_name)
+      self.get_hash(extract_name, model_name, :all).values
+    end
     # Execute the ActiveRecord query associated with the extract set
     #
     def execute_extract_code(extract_name)
@@ -151,6 +158,7 @@ module Fe
       true
     end
 
+    # TODO: HOW IS THIS USED? DEPRECATE
     def augment_factory_girl!
       FactoryGirl::Syntax::Default::DSL.send(:include, Fe::FactoryGirlDslMethods)
     end
