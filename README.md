@@ -118,13 +118,12 @@ The essense of the Fe.extract "algorithm" is:
 * Monkey with ActiveRecord queries to collect the data set you want to use in your test case.
 * Represent the ActiveRecord query code as a string, i.e. `x=[User.all,Project.includes(:author).find(22)]'`
 * Extract the data into fixtures, `Fe.extract(x,:name => :some_fixture_set_name)`
-* Open up test/fe_fixtures/some_fixture_set_name and poke around the yml
-files to make sure you've captured what you need. Tweak `extract_name` if you need to and `.rebuild`
+* Open up test/fe_fixtures/some_fixture_set_name and poke around the yml files to make sure you've captured what you need. Tweak `extract_name` if you need to and `.rebuild`
 * In your test case's setup method:
 
     Fe.load_db(:some_fixture_set_name)
-    # then load a instance var to test against:
-    # in this case 22 is the id of a fixture that has just been loaded
+    ...then load a instance var to test against:
+    ...in this case 22 is the id of a fixture that has just been loaded
     @the_project = Project.find(22)
     or
     Fe.execute_extract_code(:some_fixture_set_name).first
