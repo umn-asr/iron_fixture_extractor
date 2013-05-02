@@ -1,41 +1,44 @@
 # About Iron Fixture Extractor
 
-For extracting complex data from staging and production databases to be used for automated testing (works great with whatever testing framework your using).
+For extracting complex data from staging and production databases to be used for automated testing.
 
 Its best when:
-* your data is too complex for factories (like when integrating with legacy systems, ERP systems, etc)
-* creating and maintaining manual fixtures is cumbersome and brittle (always, :))
 
-Its good for:
+* your data is too complex for factories
+* creating and maintaining manual fixtures is cumbersome and brittle
 
-  Pulling data from a staging database containing vetted data that has
-  been built up by the development team, users, or business analysts to be used
-  as "archetypical" data structures in test cases, demonstration.
+## Use cases
 
-  Taking snapshots of production data that has triggered unexpected errors to be incorporated into test cases for closer inspection and correction.
+* Pulling data from a staging database containing vetted data that has
+  been built up by the development team, users, or business analysts to be loaded and used
+  as "archetypical" data structures in test cases or demos.
 
-How it works:
+* Taking snapshots of production data that has triggered app exceptions 
+  to be more closely inspected and incorporated into test cases.
 
-  Feed it an array of ActiveRecord objects or ActiveRelation object and it will allow you to extract, load, and rebuild the records associated with your queries.
+## How it works
+
+  Feed it an array of ActiveRecord objects or ActiveRelation object and
+it will allow you to:
+
+* extract data to .yml fixtures
+* load it into a database or memory
+* rebuild .yml fixtures from a saved ActiveRelation extraction query.
 
 ## Usage
-### Extract (fixture files, typically run in an irb/"rails console")
+
+### *Extract* fixture set (typically run in a rails console)
 
     Fe.extract 'Post.includes(:comments, :author).limit(1)', :name =>  'first_post_w_comments_and_authors'
+    # or for multi-model extraction something like this:
+    x = '[UserRole.all, Project.includes(:contributors => [:bio])]'
+    Fe.extract(x,:name => :all_permissions_and_all_projects)
 
-### Load (dataset into database, typically run in a "setup" test method )
+### *Load* fixture set into database (typically run in a "setup" test method )
 
     Fe.load_db(:first_post_w_comments_and_authors)
 
-### Rebuild (fixture files associated with the initial extraction, typically via rake task (in Rails))
-
-    Fe.rebuild(:first_post_w_comments_and_authors)
-
-### Truncate tables (associated with a fixture set...if you're not using DatabaseCleaner)
-
-    Fe.truncate_tables_for(:first_post_w_comments_and_authors)
-
-### Pull up hashes from a particular fixture file (very handy)
+### *Load particular fixture into memory* (typically used to instantiate an object or build a factory)
 
     # 'r1' is the fixture's name, all fixture names start with 'r', 1 is the id
     Fe.get_hash(:first_post_w_comments_and_authors, Post, 'r1')
@@ -63,8 +66,17 @@ This feature is used to instantiate objects from the hash or define factories li
     h=Fe.get_hash(:first_post_w_comments_and_authors, Post, :first)
     ye_old_post=Post.new(h)
 
-### 
+### *Rebuild* fixture files associated with the initial extraction (also doable via rake task in Rails)
+
+    Fe.rebuild(:first_post_w_comments_and_authors)
+    # Make sure to `diff` your test/fe_fixtures dir to see what has changed in .yml files
+
+### *Truncate tables* associated with a fixture set (if you're not using DatabaseCleaner)
+
+    Fe.truncate_tables_for(:first_post_w_comments_and_authors)
+
 ## Installation
+
 Add this line to your application's Gemfile:
 
     gem 'iron_fixture_extractor'
@@ -77,20 +89,63 @@ Or install it yourself as:
 
     $ gem install iron_fixture_extractor
 
-### Extract
-The essense of the Fe.extract is dirt simple:
+## Advanced Usage/Changing fe_manifest.yml for fixture set
+
+* Each extracted fixture set has a fe_manifest.yml file that contains
+details about:
+
+  * The ActiveRelation/ActiveRecord query to used to instantiate objects
+to be serialized to .yml fixtures.
+  * The models, table names, and row counts of records in the fixture set
+
+By modifying the :extract_code: field, you can change the extraction
+behavior associated with .rebuild. It can be handy if you want to add
+data to a fixture set.
+
+## Dirt Simple Shiznit
+
+The essense of the Fe.extract "algorithm" is:
 
     for each record given to Fe.extract
       recursively resolve any association pre-loaded in the .association_cache [ActiveRecord] method
       add it to a set of records keyed by model name
     write each set of records as a <TheModel.table_name>.yml fixture
-    write a fe_manifest.yml that will allow you to later change the query, inspect row counts, and rebuild the fixtures by re-executing the originate queries
+    write a fe_manifest.yml containing original query, row counts, etc
 
-## Compatibility
+## Typical Workflow 
+* Data extracted from a dev, staging, or production db is needed
+* Open `rails console` in the appropriate environment
+* Monkey with ActiveRecord queries to collect the data set you want to use in your test case.
+* Represent the ActiveRecord query code as a string, i.e. `x=[User.all,Project.includes(:author).find(22)]'`
+* Extract the data into fixtures, `Fe.extract(x,:name => :some_fixture_set_name)`
+* Open up test/fe_fixtures/some_fixture_set_name and poke around the yml
+files to make sure you've captured what you need. Tweak `extract_name` if you need to and `.rebuild`
+* In your test case's setup method:
+
+    Fe.load_db(:some_fixture_set_name)
+    # then load a instance var to test against:
+    # in this case 22 is the id of a fixture that has just been loaded
+    @the_project = Project.find(22)
+    or
+    Fe.execute_extract_code(:some_fixture_set_name).first
+    
+* In your test case's teardown method:
+
+    DatabaseCleaner.clean...
+    or
+    Fe.truncate_tables_for(:some_fixture_set_name)
+
+* In your test case `require 'debugger'; debugger; puts 'x'`...inspect @the_project or whatever does the loaded object and db state have the fixtures you want.
+* Once things seem to be working-ish in your tests, add the fixtures to source control + test case that uses them.
+
+## Gem Compatibility
+
 * Works on MRI 1.9.3 and 1.9.2
 * Does not work on JRuby, 1.8.7
 
-## Feature Wishlist
+## If you want to help out/todos
+
+* Test on Rails 4 
 * Get this to work on JRuby: jigger the Gemfile, .gemspec, and
   test_helper.rb
 * If you give a non-string arg to .extract, the manifest should resolve
