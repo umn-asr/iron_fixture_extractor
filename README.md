@@ -178,6 +178,34 @@ usual github approach:
 
 If you have other ideas for this tool, make a Github Issue.
 
+
+#### TODO: JOE REPLACE THE ABOVE CONTENT WITH THIS METHOD
+Alternatively, another way to lower the barrier to contributing is to submodule the Gem into your project
+and hack in the features you need to support your app specific, then add
+a test case to the Gem itself that illustrates your change...
+
+#### TODO: Write a "For Rspec users", include an initializer:
+
+    # config/initializers/iron_fixture_extractor.rb
+    Fe.fixtures_root = 'spec/fe_fixtures' if defined?(Fe)
+
+#### TODO: Write something up about bug with has_many :through
+* If you have a query that utilizes a has_many :through.  Make sure to
+put the table that facilitates the :through AFTER the one that uses it.
+ie.
+
+    # NOT WORKING
+    query='Etl::Receipt.includes(:audits, :instcd_to_jobid_mappings, :dars_job_queue_lists  => {:job_queue_runs => [:job_queue_outs, {:job_queue_reqs => {:job_queue_subreqs  => :job_queue_courses}}]})'
+    t=Fe.extract(query,:name => 'poo')
+
+    # WORKING
+    query='Etl::Receipt.includes(:audits, {:dars_job_queue_lists  => {:job_queue_runs => [:job_queue_outs, {:job_queue_reqs => {:job_queue_subreqs  => :job_queue_courses}}]}}, :instcd_to_jobid_mappings)'
+    t=Fe.extract(query,:name => 'poo')
+
+* Beers, kudos, praise, and glory for a developer who can find the
+reason for this and a fix...I tried, but couldn't figure it out, hence
+the work around.
+
 ## Footnotes
 I used various ideas from the following blog posts, gists, and existing
 ruby gems, thanks to the authors of these pages:
