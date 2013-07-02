@@ -142,41 +142,10 @@ The essense of the Fe.extract "algorithm" is:
 * Works on MRI 1.9.3 and 1.9.2
 * Does not work on JRuby, 1.8.7
 
-## If you want to help out/todos
-
-* Test on Rails 4 
-* Get this to work on JRuby: jigger the Gemfile, .gemspec, and
-  test_helper.rb
-* If you give a non-string arg to .extract, the manifest should resolve
-  the .extract_code to be a bunch of look-ups by primary key ala [Post.find(1),Comment.find(2)].
-* The output of each of the main commands should be meaningful, aka,
-  make extractor implement a sensible .to_s and .inspect 
-* load_db should error if Rails.env or RAILS_ENV is defined and set to
-  production
-* An :extract_schema option passed to .extract that uses `rake db:structure:dump` functionality 
-  or ActiveRecord::Base.connection.structure_dump to create .sql files containing a "create table" statement
-  for each distinct model class.  This would allow you to completely de-couple your test cases + fixtures
-  from the external databases they were extracted from.
-
 ## Contributing
-To run test cases:
 
-    # clone or fork repo
-    cd iron_fixture_extractor
-    rake # runs test cases
+See spec/README_FOR_DEVELOPERS.md, NOTE: MAJOR REFACTOR UNDERWAY TO SWITCH FROM SHOULDA TO RSPEC, TESTS ARE CURRENTLY BROKEN 
 
-Help on the missing features above would be much appreciated per the
-usual github approach:
-
-1. Fork it
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Ensure the test cases run
-4. Copy one of the test cases (like basic_test.rb), rename, rip out the guts, and add some tests + code to the app
-5. Commit your changes (`git commit -am 'Added some feature'`)
-6. Push to the branch (`git push origin my-new-feature`)
-7. Create new Pull Request
-
-If you have other ideas for this tool, make a Github Issue.
 
 ## Footnotes
 I used various ideas from the following blog posts, gists, and existing
