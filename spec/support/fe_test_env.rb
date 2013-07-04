@@ -13,8 +13,64 @@ class FeTestEnv
   def initialize(root_path) # caller should specify full path
     @root_path = root_path
   end
+  # PUBLIC API
 
+  def connect_to_source
+    ActiveRecord::Base.establish_connection(database_dot_yml_hash['source'])
+  end
+
+  def connect_to_target
+    ActiveRecord::Base.establish_connection(database_dot_yml_hash['target'])
+  end
   def setup
+       #:make_fixtures_dir_and_set_fixtures_root,
+       #:load_models,
+       #:establish_connection,
+       #:migrate_schema,
+       #:migrate_fake_production_data]
+    make_fixtures_dir_and_set_fe_fixtures_root
+    load_models 
+    #load_migrations
+  end
+
+  def make_fixtures_dir_and_set_fe_fixtures_root
+    FileUtils.mkdir_p(fe_fixtures_dir)
+    Fe.fixtures_root = fe_fixtures_dir
+  end
+
+  def load_models
+    model_files.each do |m|
+      load m
+    end
+  end
+  def teardown
+  end
+  def reload
+  end
+
+  # File & directory location accessors (provides full path)
+  # --------------------------------------------------------
+  #
+  def database_dot_yml_file
+    File.join(root_path,'config','database.yml')  
+  end
+  def database_dot_yml_hash
+    YAML::load_file(database_dot_yml_file)
+  end
+  def migration_files
+    Dir["#{root_path}/migrations/**/*.rb"]
+  end
+  def model_files
+    Dir["#{root_path}/models/**/*.rb"]
+  end
+  def tmp_dir
+    File.expand_path(File.join(File.dirname(__FILE__),'..','tmp'))
+  end
+  def fe_fixtures_dir
+    File.join(tmp_dir,'fe_fixtures')  
+  end
+  def sqlite_db_dir
+    tmp_dir
   end
 
   # Singleton-style

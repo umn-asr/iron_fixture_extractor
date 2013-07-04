@@ -10,16 +10,10 @@ RSpec.configure do |config|
   config.color = true
 end
 
-ENV['fe_test_type'] ||= 'sqlite'
-case ENV['fe_test_type']
-when 'oracle'
-  # someday we might have tests for different adapters
-when 'mysql'
-when 'postgres'
-when 'sqlite'
-  require 'sqlite3'
-  ENV['fe_test_env'] ||= 'dummy1'
-  FeTestEnv.instance = FeTestEnv.new(File.join(File.dirname(__FILE__),'dummy_environments','sqlite','dummy1'))
-else
-  raise 'invalid ENV[fe_test_type]'
-end
+require 'sqlite3'
+ENV['fe_test_env'] ||= 'dummy1'
+FeTestEnv.instance = FeTestEnv.new(File.join(File.dirname(__FILE__),'dummy_environments','sqlite','dummy1'))
+
+#FeTestEnv.instance.setup
+#FeTestEnv.instance.teardown
+#FeTestEnv.instance.reload
