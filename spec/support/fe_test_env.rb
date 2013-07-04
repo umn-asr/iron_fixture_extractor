@@ -1,51 +1,54 @@
-#joe-gogginss-macbook-pro:iron_fixture_extractor goggins$ cp -R test/config spec/dummy_environments/sqlite/dummy1/
-#joe-gogginss-macbook-pro:iron_fixture_extractor goggins$ cp -R test/migrations spec/dummy_environments/sqlite/dummy1/
-#joe-gogginss-macbook-pro:iron_fixture_extractor goggins$ cp -R test/models/ spec/dummy_environments/sqlite/dummy1/
-#joe-gogginss-macbook-pro:iron_fixture_extractor goggins$ ls test/tmp/
-#fake_production.sqlite3	fe_fixtures
-#joe-gogginss-macbook-pro:iron_fixture_extractor goggins$ mkdir -p spec/dummy_environments/sqlite/dummy1/spec/fe_fixtures
-#joe-gogginss-macbook-pro:iron_fixture_extractor goggins$ touch spec/dummy_environments/sqlite/dummy1/spec/fe_fixtures/.gitkeep
-#joe-gogginss-macbook-pro:iron_fixture_extractor goggins$ mkdir spec/dummy_environments/sqlite/dummy1/db
-#joe-gogginss-macbook-pro:iron_fixture_extractor goggins$ touch !$/.gitkeep
-#touch spec/dummy_environments/sqlite/dummy1/db/.gitkeep
+# An object for setting up dummy source and target environments 
+# used through the test suite
+#
 class FeTestEnv
   attr_reader :root_path
-  def initialize(root_path) # caller should specify full path
+  # caller should specify full path
+  # by default it isn't lazy with initialization of tmp dir + loading models
+  def initialize(root_path, options = {:lazy => false})
     @root_path = root_path
-  end
-  # PUBLIC API
-
-  def connect_to_source
-    ActiveRecord::Base.establish_connection(database_dot_yml_hash['source'])
-  end
-
-  def connect_to_target
-    ActiveRecord::Base.establish_connection(database_dot_yml_hash['target'])
-  end
-  def setup
-       #:make_fixtures_dir_and_set_fixtures_root,
-       #:load_models,
-       #:establish_connection,
-       #:migrate_schema,
-       #:migrate_fake_production_data]
-    make_fixtures_dir_and_set_fe_fixtures_root
-    load_models 
-    #load_migrations
+    if !options[:lazy]
+      initialize_tmp
+      load_models
+    end
   end
 
-  def make_fixtures_dir_and_set_fe_fixtures_root
+  # INITIALIZATION HELPERS
+  def initialize_tmp
+    FileUtils.rm_rf(tmp_dir)
+    FileUtils.mkdir_p(tmp_dir)
     FileUtils.mkdir_p(fe_fixtures_dir)
-    Fe.fixtures_root = fe_fixtures_dir
+    self
   end
-
   def load_models
     model_files.each do |m|
       load m
     end
+    self
   end
-  def teardown
+
+  # PUBLIC API
+  def create_tables_in(string)
+    send("connect_to_#{string}")
+    run_migrations
   end
-  def reload
+  def create_rows_in(string)
+    send("connect_to_#{string}")
+    run_data_migrations
+  end
+  def connect_to_source
+    ActiveRecord::Base.establish_connection(database_dot_yml_hash['source'])
+  end
+  def connect_to_target
+    ActiveRecord::Base.establish_connection(database_dot_yml_hash['target'])
+  end
+
+  # WORKER HELPERS
+  def run_migrations
+    ActiveRecord::Migrator.migrate("#{root_path}/migrations/",nil)
+  end
+  def run_data_migrations
+    ActiveRecord::Migrator.migrate("#{root_path}/data_migrations/",nil)
   end
 
   # File & directory location accessors (provides full path)

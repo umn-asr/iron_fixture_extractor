@@ -1,13 +1,26 @@
 require 'spec_helper'
 
-describe "Outer loop" do
+describe "desired behavior" do
   before(:each) do
     @sqlite_env_path = File.join(File.dirname(__FILE__),'dummy_environments','sqlite','dummy1')
     @fe_test_env = FeTestEnv.new(@sqlite_env_path)
-    FileUtils.rm_rf(@fe_test_env.tmp_dir)
-    FileUtils.mkdir_p(@fe_test_env.tmp_dir)
-    FileUtils.rm_rf(@fe_test_env.fe_fixtures_dir)
-    FileUtils.mkdir_p(@fe_test_env.fe_fixtures_dir)
+  end
+
+  it "lets us create data structures + data in source and switch to target with no problems",:focus => true do
+    @fe_test_env.create_tables_in('source')
+    expect(Post.first).to be_nil
+    @fe_test_env.create_rows_in('source')
+    expect(Post.first).to be_a_kind_of(Post)
+    @fe_test_env.connect_to_target
+    expect {Post.first}.to raise_exception
+    @fe_test_env.create_tables_in('target')
+    expect(Post.first).to be_nil
+  end
+end
+describe "structure of a dummy environment" do
+  before(:each) do
+    @sqlite_env_path = File.join(File.dirname(__FILE__),'dummy_environments','sqlite','dummy1')
+    @fe_test_env = FeTestEnv.new(@sqlite_env_path)
   end
   it "key test env file paths & dirs exist" do
     expect(File.directory?(@fe_test_env.root_path)).to eql(true)
@@ -24,12 +37,13 @@ describe "Outer loop" do
     expect(File.directory?(@fe_test_env.sqlite_db_dir)).to eql(true)
   end
 
-  it "can connect to source and target",:focus => true do
+  it "can connect to source and target" do
     # SOURCE
     @fe_test_env.connect_to_source
     source_db = @fe_test_env.database_dot_yml_hash['source']['database']
     expect(ActiveRecord::Base.connection).to be_a_kind_of(ActiveRecord::ConnectionAdapters::SQLite3Adapter)
-    ActiveRecord::Base.connection.tables # hitting it creates the file
+    ActiveRecord::Base.connection.execute('create table t (id int)')
+    expect(ActiveRecord::Base.connection.tables.length).to eql(1)
     expect(File.exists?(source_db)).to eql(true)
 
     # TARGET
@@ -37,50 +51,8 @@ describe "Outer loop" do
     @fe_test_env.connect_to_target
     target_db = @fe_test_env.database_dot_yml_hash['target']['database']
     expect(ActiveRecord::Base.connection.instance_variable_get(:@config)[:database]).to eql(target_db)
-    ActiveRecord::Base.connection.tables # hitting it creates the file
+    expect(ActiveRecord::Base.connection.tables.length).to eql(0)  # there is no table in target
     expect(File.exists?(target_db)).to eql(true)
   end
-  it "should load and unload models" do
-    # CONTINUE HER:w
-    #
-
-  end
-  it "lets us hit the Post table bound to the source database" do
-    @fe_test_env.setup
-    expect(Post.first).to be_a_kind_of(Post)
-  end
-
-  it "creates a source and target db on setup and deletes them on teardown" do
-    @fe_test_env.setup
-    expect(File.exist?(@fe_test_env.source_sqlite_database_file)).to eql(true)
-    #expect(File.exist?(@fe_test_env.target_sqlite_database_file)).to eql(true)
-  end
-
-end
-# This tests the test env. weird.
-describe "FeTestEnv.instance properties" do
-  it "has a root_path" do
-    expect(FeTestEnv.instance.root_path).to match(/spec\/dummy_environments\/sqlite\/#{ENV['fe_test_env']}/)
-    expect(File.directory?(FeTestEnv.instance.root_path)).to eql(true)
-  end
-
-  it 'has .model_files' do
-    # TODO: CONTINUE HERE
-    # expect(FeTestEnv.instance.model_files).to match(/post\.rb/)
-    #
-    pending
-  end
-
-  it 'has .model_classes' do
-    pending
-  end
-
-  # WHAT ELSE CAN WE PORT FROM test/fe_test_env.rb
 end
 
-describe "FeTestEnv.instance.setup!" do
-end
-describe "FeTestEnv.instance.teardown!" do
-end
-describe "FeTestEnv.instance.reload!" do
-end
