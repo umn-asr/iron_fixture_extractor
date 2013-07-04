@@ -3,7 +3,7 @@ require 'spec_helper'
 describe "desired behavior" do
   before(:each) do
     @sqlite_env_path = File.join(File.dirname(__FILE__),'dummy_environments','sqlite','dummy1')
-    @fe_test_env = FeTestEnv.new(@sqlite_env_path)
+    @fe_test_env = FeTestEnv.new(@sqlite_env_path).initialize_tmp.load_models
   end
 
   it "lets us create data structures + data in source and switch to target with no problems",:focus => true do
@@ -20,7 +20,7 @@ end
 describe "structure of a dummy environment" do
   before(:each) do
     @sqlite_env_path = File.join(File.dirname(__FILE__),'dummy_environments','sqlite','dummy1')
-    @fe_test_env = FeTestEnv.new(@sqlite_env_path)
+    @fe_test_env = FeTestEnv.new(@sqlite_env_path).initialize_tmp.load_models
   end
   it "key test env file paths & dirs exist" do
     expect(File.directory?(@fe_test_env.root_path)).to eql(true)

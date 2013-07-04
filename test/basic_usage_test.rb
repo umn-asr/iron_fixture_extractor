@@ -13,6 +13,8 @@ class BasicUsage < ActiveSupport::TestCase
         FeTestEnv.teardown
       end
       should "provide the right output, and put the file in the right place" do
+
+        # CONTINUE PORTING FROM HERE in extract_spec!!!!!!!!!!
         extractor = Fe.extract(@extract_code, :name => @extract_name)
         assert_kind_of Fe::Extractor, extractor
         assert (%w(Post Comment Author) - extractor.model_names).empty?, "only these keys should exist"

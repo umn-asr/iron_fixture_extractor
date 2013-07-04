@@ -8,12 +8,20 @@ class FeTestEnv
   def initialize(root_path, options = {:lazy => false})
     @root_path = root_path
     if !options[:lazy]
-      initialize_tmp
-      load_models
+      bomb_and_rebuild
     end
   end
 
   # INITIALIZATION HELPERS
+  def bomb_and_rebuild
+    Fe.fixtures_root = self.fe_fixtures_dir
+    initialize_tmp
+    load_models
+    connect_to_source
+    create_tables_in('source')
+    create_rows_in('source')
+  end
+
   def initialize_tmp
     FileUtils.rm_rf(tmp_dir)
     FileUtils.mkdir_p(tmp_dir)
