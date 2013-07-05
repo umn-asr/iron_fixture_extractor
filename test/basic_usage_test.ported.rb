@@ -92,22 +92,23 @@ class BasicUsage < ActiveSupport::TestCase
       teardown do
         FeTestEnv.teardown
       end
-      should "truncate only the tables in the fixture set" do
-        Group.create
-        assert_equal 1, Group.count
+      # PORTED
+      #should "truncate only the tables in the fixture set" do
+        #Group.create
+        #assert_equal 1, Group.count
 
-        Fe.load_db(@extract_name)
-        assert_equal 1, Post.count
-        assert_equal 1, Comment.count
-        assert_equal 1, Author.count
+        #Fe.load_db(@extract_name)
+        #assert_equal 1, Post.count
+        #assert_equal 1, Comment.count
+        #assert_equal 1, Author.count
 
-        Fe.truncate_tables_for(@extract_name)
-        assert_equal 1, Group.count
-        assert_equal 0, Post.count
-        assert_equal 0, Comment.count
-        assert_equal 0, Author.count
+        #Fe.truncate_tables_for(@extract_name)
+        #assert_equal 1, Group.count
+        #assert_equal 0, Post.count
+        #assert_equal 0, Comment.count
+        #assert_equal 0, Author.count
 
-      end
+      #end
     end
   end
 end

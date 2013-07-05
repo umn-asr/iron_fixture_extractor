@@ -1,3 +1,4 @@
+require 'rspec'
 require 'iron_fixture_extractor'
 # Require test helpers like FeTestEnv
 Dir[File.join(File.dirname(__FILE__),"support/**/*.rb")].each {|f| require f}

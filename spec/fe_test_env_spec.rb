@@ -1,3 +1,10 @@
+# About
+# =====
+#
+# This tests FeTestEnv, the helper object used to create a dummy environment that the 
+# test cases can run.  You can almost definitely ignore this unless you suspect the testing
+# framework is broken.
+#
 require 'spec_helper'
 
 describe "desired behavior" do

@@ -3,15 +3,6 @@ Running Tests
 
     bundle exec rspec
 
-Environment Variables
------------
-
-* fe_test_type: (defaults to "sqlite")
-* fe_test_env:  (defaults to "dummy1")
-
-These two vars above determine where all of the models + migrations will
-be taken from.
-
 Notes
 -----
 * Uses sqlite to do testing.
@@ -33,4 +24,6 @@ usual github approach:
 
 If you have other ideas for this tool, make a Github Issue.
 
-* 
+Tasks
+-----
+

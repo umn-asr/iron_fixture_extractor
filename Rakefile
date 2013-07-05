@@ -2,15 +2,14 @@
 require "bundler/gem_tasks"
 require 'rake/testtask'
 
-Rake::TestTask.new(:test) do |t|
-  t.libs << 'lib'
-  t.libs << 'test'
-  t.pattern = 'test/**/*_test.rb'
-  t.verbose = true
+desc "Run the rspec test sweet"
+task :test do
+  puts "Running specs in /spec."
+  sh "bundle exec rspec"
 end
 task :default => 'test'
 
 desc "Open an irb session preloaded with this library"
 task :console do
-  sh "irb -rubygems -I lib -I test -r test_helper -r fe"
+  sh "bundle exec irb -rubygems -I lib -I spec -r spec_helper -r fe"
 end
