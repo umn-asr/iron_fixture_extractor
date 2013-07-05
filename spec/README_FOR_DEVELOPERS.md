@@ -23,7 +23,3 @@ usual github approach:
 7. Create new Pull Request
 
 If you have other ideas for this tool, make a Github Issue.
-
-Tasks
------
-
