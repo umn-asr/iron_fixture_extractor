@@ -11,9 +11,4 @@ RSpec.configure do |config|
 end
 
 require 'sqlite3'
-ENV['fe_test_env'] ||= 'dummy1'
 FeTestEnv.instance = FeTestEnv.new(File.join(File.dirname(__FILE__),'dummy_environments','sqlite','dummy1'))
-
-#FeTestEnv.instance.setup
-#FeTestEnv.instance.teardown
-#FeTestEnv.instance.reload

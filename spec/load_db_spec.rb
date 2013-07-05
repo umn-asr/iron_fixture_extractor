@@ -1,0 +1,20 @@
+require 'spec_helper'
+
+describe "Fe.load_db" do
+  include FirstPostWCommentsAndAuthors
+  it "ensures the test env is all good..there are no rows" do
+    FeTestEnv.instance.connect_to_target
+    FeTestEnv.instance.create_tables_in('target')
+    @model_names.each do |mn|
+      expect(mn.constantize.count).to eql(0)
+    end   
+  end
+  it "has a loaded target database with the same number of rows than is in the source" do
+    FeTestEnv.instance.connect_to_target
+    FeTestEnv.instance.create_tables_in('target')
+    Fe.load_db(@extract_name)
+    @extractor.row_counts.each_pair do |m,c|
+      expect(m.constantize.count).to eql(c), "number of rows in the target should be the same as the counts from the source given the extract_code"
+    end
+  end
+end

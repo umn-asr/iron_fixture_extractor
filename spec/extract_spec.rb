@@ -1,24 +1,37 @@
 require 'spec_helper'
 
-describe "Fe.extract" do
-  before(:each) do
-    FeTestEnv.instance.bomb_and_rebuild
-    @extract_code = 'Post.includes(:comments, :author).limit(1)'
-    @extract_name = :first_post_w_comments_and_authors
-  end
+describe "Fe.extract and Fe::Extractor instances" do
+  include FirstPostWCommentsAndAuthors
+  it "should return an Fe::Extractor instance that exposes the extracted data information" do
+    expect(@extractor).to be_a_kind_of(Fe::Extractor)
 
-  it "should provide the right output, and put the file in the right place" do
-    extractor = Fe.extract(@extract_code, :name => @extract_name)
-    # CONTINUE HERE
-    expect(extractor).to be_a_kind_of(Fe::Extractor)
-    #assert (%w(Post Comment Author) - extractor.model_names).empty?, "only these keys should exist"
-    #assert_equal @extract_name, extractor.name
-    #assert_equal Post.table_name, extractor.table_names['Post']
-    #assert File.exists?(File.join(Fe.fixtures_root,'first_post_w_comments_and_authors','fe_manifest.yml')), "The file that allows the fixtures to get rebuilt"
-    #assert_equal 1, extractor.row_counts['Post']
-    #assert_equal 1, extractor.row_counts['Author']
-    #assert_kind_of Hash, extractor.manifest_hash
-    #assert File.exists?(File.join(Fe.fixtures_root,'first_post_w_comments_and_authors',"#{Post.table_name}.yml")), "The file is created"
+    # The stuff passed into the constructor
+    expect(@extract_name.to_sym).to eql(@extractor.name), "note that the extractor name is a symbol, even if given a string"
+    expect(@extract_code).to eql(@extractor.extract_code), "the code used to pull the data"
+
+    # The models involved
+    expect(@extractor.model_names - @model_names).to be_empty
+    expect(@extractor.models).to be_a_kind_of(Array)
+    expect(@extractor.models.first.ancestors).to include(ActiveRecord::Base)
+
+    # The fixture files involved
+    expect(@extractor.manifest_hash).to be_a_kind_of(Hash), "The hash representation of what is saved to fe_manifest.yml"
+    expect(@extractor.output_hash).to be_a_kind_of(Hash), "The hash representation all of the the extracted data"
+    @model_names.each do |mn|
+      @extractor.output_hash.keys
+    end 
+  end
+  it "should put data into the .yml files" do
+    expect(Post.table_name).to eql(@extractor.table_names['Post'])
+    expect(File.exists?(File.join(Fe.fixtures_root,'first_post_w_comments_and_authors','fe_manifest.yml'))).to eql(true)
+    @model_names.each do |mn|
+      expect(File.exists?(File.join(Fe.fixtures_root,'first_post_w_comments_and_authors',"#{mn.constantize.table_name}.yml"))).to eql(true)
+    end
+
+    # Asserting the state of the imported data--tied to the data_migrations
+    # brittle
+    expect(@extractor.row_counts['Post']).to eql(1)
+    expect(@extractor.row_counts['Author']).to eql(1)
   end
 
 end

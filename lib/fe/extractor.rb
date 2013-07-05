@@ -1,7 +1,12 @@
+# 
 module Fe
   class Extractor
     attr_accessor :input_array, :extract_code, :name, :row_counts,:table_names, :manifest_hash
 
+    ##################
+    #   PUBLIC API   #
+    ##################
+    #
     def extract
       load_input_array_by_executing_extract_code
       @row_counts = {}
@@ -27,52 +32,9 @@ module Fe
       self.write_model_fixtures
     end
 
-    # This is called from 2 types of invocations
-    #   Fe.extract('Post.all', :name => :bla)
-    #   or 
-    #   Fe.extract('[Post.all,Comment.all]', :name => :bla2)
-    #   
-    def load_from_args(active_relation_or_array,*args)
-      options = args.extract_options!
-      @name = (options[:name] || Time.now.strftime("%Y_%m_%d_%H_%M_%S")).to_sym
-      if active_relation_or_array.kind_of? String
-        @extract_code = active_relation_or_array 
-      else
-        raise "Extract code must be a string, so .rebuild can be called"
-      end
-    end
-
-    def load_input_array_by_executing_extract_code
-      @input_array = Array(eval(@extract_code)).to_a
-    end
-
-    def load_from_manifest
-      raise "u gotta set .name to use this method" if self.name.blank?
-      @manifest_hash = YAML.load_file(self.manifest_file_path)
-      @extract_code = @manifest_hash[:extract_code]
-      @name = @manifest_hash[:name]
-      @models = @manifest_hash[:model_names].map {|x| x.constantize}
-    end
-
-    def map_models_hash=(map_models_hash)
-      unless (map_models_hash.keys - self.models).empty?
-        raise InvalidSourceModelToMapFrom.new "your map models hash must contain keys representing class names that exist in the fe_manifest.yml"
-      end
-      @map_models_hash = map_models_hash
-    end
-
-    def map_models_hash
-      if @map_models_hash.nil?
-        {}
-      else
-        @map_models_hash
-      end
-    end
-
-
     # Loads data from each fixture file in the extract set using
     # ActiveRecord::Fixtures
-    #
+    # TODO: Rename to .load_db
     def load_into_database
       # necessary to make multiple invocations possible in a single test
       # case possible
@@ -165,6 +127,58 @@ module Fe
       end
       @fixture_hashes[model_name]
     end
+
+
+    #############################
+    #   OVERLOADED CONSTRUCTORS #
+    #############################
+    #
+    # * These are used by the Fe module to setup the Extractor object
+    # This is called from 2 types of invocations
+    #   Fe.extract('Post.all', :name => :bla)
+    #   or 
+    #   Fe.extract('[Post.all,Comment.all]', :name => :bla2)
+    #   
+    def load_from_args(active_relation_or_array,*args)
+      options = args.extract_options!
+      @name = (options[:name] || Time.now.strftime("%Y_%m_%d_%H_%M_%S")).to_sym
+      if active_relation_or_array.kind_of? String
+        @extract_code = active_relation_or_array 
+      else
+        raise "Extract code must be a string, so .rebuild can be called"
+      end
+    end
+
+    def load_input_array_by_executing_extract_code
+      @input_array = Array(eval(@extract_code)).to_a
+    end
+
+    def load_from_manifest
+      raise "u gotta set .name to use this method" if self.name.blank?
+      @manifest_hash = YAML.load_file(self.manifest_file_path)
+      @extract_code = @manifest_hash[:extract_code]
+      @name = @manifest_hash[:name]
+      @models = @manifest_hash[:model_names].map {|x| x.constantize}
+    end
+
+    # TODO: WHAT IS THIS? DEPRECATE?
+    # I think it was used for when you want to load the fixtures into new table names in the target
+    # that are different from the source, but wasn't quite finished
+    def map_models_hash=(map_models_hash)
+      unless (map_models_hash.keys - self.models).empty?
+        raise InvalidSourceModelToMapFrom.new "your map models hash must contain keys representing class names that exist in the fe_manifest.yml"
+      end
+      @map_models_hash = map_models_hash
+    end
+
+    def map_models_hash
+      if @map_models_hash.nil?
+        {}
+      else
+        @map_models_hash
+      end
+    end
+
     protected
 
     # Recursively goes over all association_cache's from the record and builds the output_hash
