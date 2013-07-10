@@ -1,6 +1,3 @@
-# TODO: PORT
-# class MultiTreeUsageTest < ActiveSupport::TestCase
-
 require 'spec_helper'
 
 describe "Fe.extract('[Post.includes(:comments).limit(1),Author.all]', :name => :two_tree) style usage works" do
