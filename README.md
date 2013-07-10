@@ -27,7 +27,7 @@ it will allow you to:
 
 ## Usage
 
-### *Extract* fixture set (typically run in a rails console)
+### *Extract* fixture set (typically run in a irb console)
 
     Fe.extract 'Post.includes(:comments, :author).limit(1)', :name =>  'first_post_w_comments_and_authors'
     # or for multi-model extraction something like this:
@@ -144,7 +144,14 @@ The essense of the Fe.extract "algorithm" is:
 
 ## Contributing
 
-See spec/README_FOR_DEVELOPERS.md, NOTE: MAJOR REFACTOR UNDERWAY TO SWITCH FROM SHOULDA TO RSPEC, TESTS ARE CURRENTLY BROKEN 
+In a nutshell:
+
+    git clone     # get the code
+    cd <the dir>
+    rake          # run the tests
+    # make a spec file and hack.
+
+See spec/README_FOR_DEVELOPERS.md for more details.
 
 
 ## Footnotes

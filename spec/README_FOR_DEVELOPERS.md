@@ -1,25 +1,26 @@
-Running Tests
------
+About Contributing to this Tool
+===============================
 
-    bundle exec rspec
+All current and future work in managed via [GitHub issues and milestones](https://github.com/joegoggins/iron_fixture_extractor/issues?state=open).  Take a look there first.
+
+Running Tests
+-------------
+
+### Run the whole test suite:
+
+    rake
+
+### Run an individual spec
+
+    bundle exec spec/<A_SPEC_FILE>.rb
 
 Notes
 -----
-* Uses sqlite to do testing.
 
-Contributing
-------------
-
-  TODO: RETHINK THIS for v1.1.0
-* Help on the missing features above would be much appreciated per the
-usual github approach:
-
-1. Fork it
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Ensure the test cases run
-4. Copy one of the test cases (like basic_test.rb), rename, rip out the guts, and add some tests + code to the app
-5. Commit your changes (`git commit -am 'Added some feature'`)
-6. Push to the branch (`git push origin my-new-feature`)
-7. Create new Pull Request
-
-If you have other ideas for this tool, make a Github Issue.
+* Uses sqlite to do testing, if you run into a bug that only happens in
+  Oracle, MySQL, etc, you could try forking it, submoduling the gem into you project,
+  and hacking on it within your project.  Feel free to submit an
+  issue/pull request even if there isn't tests to cover your
+  changes--we'll find a way to test it.
+  
+* If you have other ideas for this tool, make a Github Issue.
