@@ -40,13 +40,7 @@ module Fe
       # case possible
       ActiveRecord::Fixtures.reset_cache
       self.models.each do |model|
-        if self.map_models_hash.has_key?(model)
-          raise "Unfortunately, this is not implemented...from the implementation of .create_fixtures it seems impossible...keeping this code in case its not"
-          h = {model.table_name => self.map_models_hash[model]}
-          ActiveRecord::Fixtures.create_fixtures(self.target_path, model.table_name, h)
-        else
-          ActiveRecord::Fixtures.create_fixtures(self.target_path, model.table_name)
-        end
+        ActiveRecord::Fixtures.create_fixtures(self.target_path, model.table_name)
         case ActiveRecord::Base.connection.adapter_name
         when /oracle/i
           if model.column_names.include? "id"
@@ -159,24 +153,6 @@ module Fe
       @extract_code = @manifest_hash[:extract_code]
       @name = @manifest_hash[:name]
       @models = @manifest_hash[:model_names].map {|x| x.constantize}
-    end
-
-    # TODO: WHAT IS THIS? DEPRECATE?
-    # I think it was used for when you want to load the fixtures into new table names in the target
-    # that are different from the source, but wasn't quite finished
-    def map_models_hash=(map_models_hash)
-      unless (map_models_hash.keys - self.models).empty?
-        raise InvalidSourceModelToMapFrom.new "your map models hash must contain keys representing class names that exist in the fe_manifest.yml"
-      end
-      @map_models_hash = map_models_hash
-    end
-
-    def map_models_hash
-      if @map_models_hash.nil?
-        {}
-      else
-        @map_models_hash
-      end
     end
 
     protected
