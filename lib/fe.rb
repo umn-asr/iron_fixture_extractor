@@ -3,7 +3,6 @@ module Fe
   class InvalidSourceModelToMapFrom < Exception; end
   extend ActiveSupport::Autoload
   autoload :Extractor
-  autoload :FactoryGirlDslMethods
   require 'fe/railtie' if defined?(Rails)
 
   # global configuration
@@ -59,19 +58,13 @@ module Fe
     # Used if you want to get a hash representation of a particular
     # fixture in a fixture set for a given model
     #
-    # Used like
-    #   h = Fe.get_hash(:first_post_w_comments_and_authors, Post, 'r1')
-    # => {:id => 1, :name => 'first post', ....}
+    # Used like:
+    #
+    #   h = Fe.get_hash(:first_post_w_comments_and_authors, Post, :first)
+    #
+    #   # => {:id => 1, :name => 'first post', ....}
+    #
     # in the console
-    # or in a factory declaration like this
-    #
-    #   FactoryGirl.define do
-    #     factory :fe4,
-    #       :class => Post,
-    #       &Fe.get_hash(:first_post_w_comments_and_authors,Post,"r1").to_factory_girl_string.to_proc
-    #   end
-    #
-    # Kinda meta, but somewhat useful
     #
     def get_hash(extract_name, model_name, fixture_name)
       model_name = model_name.to_s 
@@ -96,38 +89,24 @@ module Fe
         when :all
           a_hash = h
         else
-          raise "symbols can be :first or :last"
+          raise "symbols can be :first, :last, or :all"
         end
       elsif fixture_name.kind_of? String
         raise "Fixture of the name #{fixture_name} did not exist in in #{fixture_path_for_model}" unless h.has_key?(fixture_name)
         a_hash = h[fixture_name]
       else
-        raise "fixture name must be a string or a symbol like :first or :laset"
-      end
-
-      # TODO: THIS IS NASTY META-CRAP...consider refactor
-      a_hash.define_singleton_method(:to_factory_girl_string) do
-        s=<<-EOS
-        x = #{model_name}.new(Fe.get_hash(:#{extract_name},#{model_name},"#{fixture_name}"))
-        EOS
-        model_name.constantize.column_names.each do |col|
-          s << "#{col} x.#{col}\n"
-        end
-        s.instance_eval do
-          def to_proc
-            Proc.new {
-              self
-            }
-          end
-        end
-        s
+        raise "fixture name must be a string or a symbol"
       end
       a_hash
     end
 
+
+    # Syntactic sugar for get_hash(extract_name, model_name, :all).values
+    #
     def get_hashes(extract_name, model_name)
       self.get_hash(extract_name, model_name, :all).values
     end
+
     # Execute the ActiveRecord query associated with the extract set
     #
     def execute_extract_code(extract_name)
@@ -156,11 +135,6 @@ module Fe
         end
       end
       true
-    end
-
-    # TODO: HOW IS THIS USED? DEPRECATE
-    def augment_factory_girl!
-      FactoryGirl::Syntax::Default::DSL.send(:include, Fe::FactoryGirlDslMethods)
     end
   end
 end
