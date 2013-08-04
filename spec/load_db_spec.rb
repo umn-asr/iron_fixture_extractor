@@ -17,7 +17,7 @@ describe "Fe.load_db" do
       expect(m.constantize.count).to eql(c), "number of rows in the target should be the same as the counts from the source given the extract_code"
     end
   end
-  context "load options" do
+  context ":only and :except options" do
     before(:each) do
       FeTestEnv.instance.connect_to_target
       FeTestEnv.instance.create_tables_in('target')
@@ -32,15 +32,17 @@ describe "Fe.load_db" do
       expect(Comment.count).to eql(0)
     end
 
-    it "supports :except => Array of yml file names to load all tables except those specified", :focus => true do
-      extractor = Fe.load_db(@extract_name, :except => 'authors' )
+    it "supports :except => Array of yml file names to load all tables except those specified" do
+      extractor = Fe.load_db(@extract_name, :except => ['authors', 'comments'] )
       expect(Author.count).to eql(0)
+      expect(Comment.count).to eql(0)
       expect(Post.count).to eql(extractor.row_counts['Post'])
-      expect(Comment.count).to eql(extractor.row_counts['Comment'])
     end
 
-    it "supports :map => Hash TODO " do
-
+    it "raises an exception no models result after the :only or :except filters" do
+      expect {
+        Fe.load_db(@extract_name, :except => ['authors', 'comments','posts'] )
+      }.to raise_exception
     end
   end
 end

@@ -48,9 +48,11 @@ module Fe
       elsif options.has_key?(:except)
         self.models.select {|x| !Array(options[:except]).include?(x.table_name) }
       elsif options.has_key?(:map)
+        raise "Not implemented yet"
       else
         self.models
       end
+      raise "No models to load, relax your filters (or don't both calling this method)" if the_models.empty?
 
       the_models.each do |model|
         ActiveRecord::Fixtures.create_fixtures(self.target_path, model.table_name)
