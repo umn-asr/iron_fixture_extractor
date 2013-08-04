@@ -17,4 +17,30 @@ describe "Fe.load_db" do
       expect(m.constantize.count).to eql(c), "number of rows in the target should be the same as the counts from the source given the extract_code"
     end
   end
+  context "load options" do
+    before(:each) do
+      FeTestEnv.instance.connect_to_target
+      FeTestEnv.instance.create_tables_in('target')
+    end
+    it "supports :only => Array of yml file names to only load particular tables" do
+      expect {
+        Fe.load_db(@extract_name, :only => 'posts' )
+      }.to change {
+        Post.count
+      }.from(0).to(1)
+      expect(Author.count).to eql(0)
+      expect(Comment.count).to eql(0)
+    end
+
+    it "supports :except => Array of yml file names to load all tables except those specified", :focus => true do
+      extractor = Fe.load_db(@extract_name, :except => 'authors' )
+      expect(Author.count).to eql(0)
+      expect(Post.count).to eql(extractor.row_counts['Post'])
+      expect(Comment.count).to eql(extractor.row_counts['Comment'])
+    end
+
+    it "supports :map => Hash TODO " do
+
+    end
+  end
 end

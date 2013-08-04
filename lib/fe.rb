@@ -29,11 +29,11 @@ module Fe
     # "extract_name" fixture set
     # NOTE: This is destructive, it will delete everything in the target table
     #
-    def load_db(extract_name)
+    def load_db(extract_name, options={})
       extractor = Fe::Extractor.new
       extractor.name = extract_name
       extractor.load_from_manifest
-      extractor.load_into_database
+      extractor.load_into_database(options)
       extractor
     end
 

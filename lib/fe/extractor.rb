@@ -1,7 +1,11 @@
-# 
 module Fe
   class Extractor
-    attr_accessor :input_array, :extract_code, :name, :row_counts,:table_names, :manifest_hash
+    attr_accessor :input_array,
+      :extract_code,
+      :name,
+      :row_counts,
+      :table_names,
+      :manifest_hash
 
     ##################
     #   PUBLIC API   #
@@ -35,16 +39,24 @@ module Fe
     # Loads data from each fixture file in the extract set using
     # ActiveRecord::Fixtures
     #
-    def load_into_database
+    def load_into_database(options={})
       # necessary to make multiple invocations possible in a single test
       # case possible
       ActiveRecord::Fixtures.reset_cache
-      self.models.each do |model|
+      the_models = if options.has_key?(:only)
+        self.models.select {|x| Array(options[:only]).include?(x.table_name) }
+      elsif options.has_key?(:except)
+        self.models.select {|x| !Array(options[:except]).include?(x.table_name) }
+      elsif options.has_key?(:map)
+      else
+        self.models
+      end
+
+      the_models.each do |model|
         ActiveRecord::Fixtures.create_fixtures(self.target_path, model.table_name)
         case ActiveRecord::Base.connection.adapter_name
         when /oracle/i
           if model.column_names.include? "id"
-            count = model.count
             sequence_name = model.sequence_name.to_s
             max_id = model.maximum(:id)
             next_id = max_id.nil? ? 1 : max_id.to_i + 1
@@ -153,6 +165,8 @@ module Fe
       @extract_code = @manifest_hash[:extract_code]
       @name = @manifest_hash[:name]
       @models = @manifest_hash[:model_names].map {|x| x.constantize}
+      @row_counts = @manifest_hash[:row_counts]
+      @table_names = @manifest_hash[:table_names]
     end
 
     protected
