@@ -57,10 +57,15 @@ module Fe
       raise "No models to load, relax your :only or :except filters (or don't bother calling this method)" if the_tables.empty?
 
       the_tables.each do |table_name|
+        class_name = if self.table_name_to_model_name_hash.kind_of?(Hash)
+          self.table_name_to_model_name_hash[table_name]
+        else
+          ActiveSupport::Deprecation.warn "your fe_manifest.yml does not contain a table_name_to_model_name_hash (as found in 1.0.0 or earlier). Version 2.0.0 will require this. See test cases for how to manually jigger your fe_manifest.ymls to function."
+          nil
+        end
         if options[:map].nil?
           # Vanilla create_fixtures will work fine when no mapping is being used
           ActiveRecord::Fixtures.create_fixtures(self.target_path, table_name)
-          next
         else
           # Map table_name via a function (great for prefixing)
           new_table_name = if options[:map].kind_of?(Proc)
@@ -71,7 +76,6 @@ module Fe
           else
             table_name # No mapping for this table name
           end
-          class_name = self.table_name_to_model_name_hash[table_name]
           fixtures = ActiveRecord::Fixtures.new( ActiveRecord::Base.connection,
               new_table_name,
               class_name,
@@ -87,6 +91,7 @@ module Fe
         # calls.  aka this code should be eliminated/live elsewhere.
         case ActiveRecord::Base.connection.adapter_name
         when /oracle/i
+          model = class_name.constantize
           if model.column_names.include? "id"
             sequence_name = model.sequence_name.to_s
             max_id = model.maximum(:id)
