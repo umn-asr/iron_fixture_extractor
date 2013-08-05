@@ -69,7 +69,7 @@ module Fe
           elsif options[:map][table_name].kind_of? String
             options[:map][table_name]
           else
-            raise "Only know how to map via Proc or table to table" 
+            table_name # No mapping for this table name
           end
           class_name = self.table_name_to_model_name_hash[table_name]
           fixtures = ActiveRecord::Fixtures.new( ActiveRecord::Base.connection,

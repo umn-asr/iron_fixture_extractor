@@ -38,6 +38,24 @@ it will allow you to:
 
     Fe.load_db(:first_post_w_comments_and_authors)
 
+If your fixture set is huge, you can avoid loading particular tables with:
+
+    Fe.load_db(:first_post_w_comments_and_authors, :only => 'posts')
+
+Or 
+
+    Fe.load_db(:first_post_w_comments_and_authors, :except => ['comments'])
+
+You can also load to a table name different than the source they were extracted from via a Hash or Proc:
+
+Via Proc: (this will add "a_prefix_" to all target tables)
+
+    Fe.load_db(:first_post_w_comments_and_authors, :map => -> table_name { "a_prefix_#{table_name}" })
+
+Via Hash: (just maps posts to different table, the others stay the same)
+
+    Fe.load_db(:first_post_w_comments_and_authors, :map => {'posts' => 'different_posts'})
+
 ### *Load particular fixture into memory* (typically used to instantiate an object or build a factory)
 
     # 'r1' is the fixture's name, all fixture names start with 'r', 1 is the id
