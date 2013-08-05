@@ -1,3 +1,8 @@
+## 1.1.0 -> 1.1.0
+* Deprecation warning for fe_manifest.yml's extracted from 1.0.0 or earlier.
+
+* Fix for Oracle reset pk seq (didn't work on 1.1.0)
+
 ## 1.0.0 -> 1.1.0
 * Shouldn't be any breaking changes, mostly a switch to rspec for
 testing.
