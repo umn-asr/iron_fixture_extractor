@@ -212,18 +212,14 @@ module Fe
       raise "This gem only knows how to extract stuff w ActiveRecord" unless record.kind_of? ActiveRecord::Base
       key = record.class.base_class.to_s # the base_class is key for correctly handling STI
       @output_hash[key] ||= Set.new # Set ensures no duplicates
-      @output_hash[key].add record
-      record.association_cache.each do |assoc_cache|
-        assoc_name = assoc_cache.first
-        assoc_value = assoc_cache.last.target
-        unless assoc_value.kind_of? Array
-          assoc_value = Array(assoc_value)
-        end
-        assoc_value.each do |a|
+      @output_hash[key].add(record)
+      record.association_cache.each_pair do |assoc_name,association_def|
+        Array(association_def.target).each do |a|
           self.recurse(a)
         end
       end
     end
+
     def write_model_fixtures
       FileUtils.mkdir_p(self.target_path)
       self.output_hash.each_pair do |key,records|
