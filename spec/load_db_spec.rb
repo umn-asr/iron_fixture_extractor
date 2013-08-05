@@ -7,7 +7,7 @@ describe "Fe.load_db" do
     FeTestEnv.instance.create_tables_in('target')
     @model_names.each do |mn|
       expect(mn.constantize.count).to eql(0)
-    end   
+    end
   end
   it "has a loaded target database with the same number of rows than is in the source" do
     FeTestEnv.instance.connect_to_target
@@ -44,5 +44,53 @@ describe "Fe.load_db" do
         Fe.load_db(@extract_name, :except => ['authors', 'comments','posts'] )
       }.to raise_exception
     end
+  end
+
+  context ":map option" do
+    # TODO: This is sloppy...and should probably live elsewhere
+    it "should expose a table_name_to_model_name hash", :focus => true do
+      extractor = Fe.load_db(@extract_name)
+      expect(extractor.table_name_to_model_name_hash).to be_a_kind_of(Hash)
+    end
+
+    #before(:each) do
+      #FeTestEnv.instance.connect_to_target
+      #FeTestEnv.instance.create_tables_in('target')
+      #Post.connection.execute("ALTER TABLE posts RENAME TO foo_posts")
+      #Post.table_name = 'foo_posts'
+    #end
+
+    # Two uses
+    #
+    #   1) Load into a different table but the same model
+    #
+    #     :map => {:posts => :foo_posts}
+    #
+    #   2) Load into a different model
+    #
+    #     :map => {Post => FooPost}
+    #
+    #   3) Or for a prefix style map
+    #
+    #     :map => -> 
+    #
+    # Assumptions
+    # The same model exists in both the source and the target, but the underlying table
+    # name is different
+    #it "should fail without a :map option" do
+      #expect(Post.table_name).to eql('foo_posts'), "testing the test setup"
+      #expect {
+        #Fe.load_db(@extract_name)
+      #}.to raise_exception
+    #end
+
+    #it "should work with the right map option specified", :focus => true do
+      #expect {
+        #Fe.load_db(@extract_name,
+                   #:map => -> source_table { "foo_#{source_table}" },
+                   #:only => 'posts'
+                  #)
+      #}.to_not raise_exception
+    #end
   end
 end

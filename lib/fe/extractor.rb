@@ -5,6 +5,7 @@ module Fe
       :name,
       :row_counts,
       :table_names,
+      :table_name_to_model_name_hash,
       :manifest_hash
 
     ##################
@@ -28,7 +29,8 @@ module Fe
                         :name => self.name,
                         :model_names => self.model_names,
                         :row_counts => self.row_counts,
-                        :table_names => self.models.map {|m| m.table_name}
+                        :table_names => self.models.map {|m| m.table_name},
+                        :table_name_to_model_name_hash => self.models.inject({}) {|h,m| h[m.table_name] = m.to_s; h }
                        }
       File.open(self.manifest_file_path,'w') do |file|
         file.write(@manifest_hash.to_yaml)
@@ -43,21 +45,38 @@ module Fe
       # necessary to make multiple invocations possible in a single test
       # case possible
       ActiveRecord::Fixtures.reset_cache
-      the_models = if options.has_key?(:only)
-        self.models.select {|x| Array(options[:only]).include?(x.table_name) }
-      elsif options.has_key?(:except)
-        self.models.select {|x| !Array(options[:except]).include?(x.table_name) }
-      elsif options.has_key?(:map)
-        raise "Not implemented yet"
-      else
-        self.models
-      end
-      raise "No models to load, relax your filters (or don't both calling this method)" if the_models.empty?
 
-      the_models.each do |model|
-        ActiveRecord::Fixtures.create_fixtures(self.target_path, model.table_name)
+      # Filter down the models to load if specified
+      the_tables = if options.has_key?(:only)
+        self.table_names.select {|x| Array(options[:only]).include?(x) }
+      elsif options.has_key?(:except)
+        self.table_names.select {|x| !Array(options[:except]).include?(x) }
+      else
+        self.table_names
+      end
+      raise "No models to load, relax your :only or :except filters (or don't bother calling this method)" if the_tables.empty?
+
+      the_tables.each do |table_name|
+        # Change the table names of the target models if specified
+        #table_name = if options[:map].kind_of? Proc
+          #options[:map].call(table_name)
+        #elsif options[:map].kind_of? Hash
+        #else
+          #table_name
+        #end
+
+        # Source
+        #   Model: Post
+        #   Table: posts
+        # Target
+        #   Model: Post
+        #   Table: foo_posts
+        #
+        # require 'debugger'; debugger; puts 's'
+        ActiveRecord::Fixtures.create_fixtures(self.target_path, table_name)
         case ActiveRecord::Base.connection.adapter_name
         when /oracle/i
+          # TODO: MUST REDO WITHOUT USING model
           if model.column_names.include? "id"
             sequence_name = model.sequence_name.to_s
             max_id = model.maximum(:id)
@@ -169,6 +188,7 @@ module Fe
       @models = @manifest_hash[:model_names].map {|x| x.constantize}
       @row_counts = @manifest_hash[:row_counts]
       @table_names = @manifest_hash[:table_names]
+      @table_name_to_model_name_hash = @manifest_hash[:table_name_to_model_name_hash]
     end
 
     protected
