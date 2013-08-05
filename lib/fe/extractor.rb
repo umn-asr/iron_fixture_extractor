@@ -57,26 +57,36 @@ module Fe
       raise "No models to load, relax your :only or :except filters (or don't bother calling this method)" if the_tables.empty?
 
       the_tables.each do |table_name|
-        # Change the table names of the target models if specified
-        #table_name = if options[:map].kind_of? Proc
-          #options[:map].call(table_name)
-        #elsif options[:map].kind_of? Hash
-        #else
-          #table_name
-        #end
-
-        # Source
-        #   Model: Post
-        #   Table: posts
-        # Target
-        #   Model: Post
-        #   Table: foo_posts
-        #
-        # require 'debugger'; debugger; puts 's'
-        ActiveRecord::Fixtures.create_fixtures(self.target_path, table_name)
+        if options[:map].nil?
+          # Vanilla create_fixtures will work fine when no mapping is being used
+          ActiveRecord::Fixtures.create_fixtures(self.target_path, table_name)
+          next
+        else
+          # Map table_name via a function (great for prefixing)
+          new_table_name = if options[:map].kind_of?(Proc)
+            options[:map].call(table_name)
+          # Map table_name via a Hash table name mapping
+          elsif options[:map][table_name].kind_of? String
+            options[:map][table_name]
+          else
+            raise "Only know how to map via Proc or table to table" 
+          end
+          class_name = self.table_name_to_model_name_hash[table_name]
+          fixtures = ActiveRecord::Fixtures.new( ActiveRecord::Base.connection,
+              new_table_name,
+              class_name,
+              ::File.join(self.target_path, table_name))
+          fixtures.table_rows.each do |the_table_name,rows|
+            rows.each do |row|
+              ActiveRecord::Base.connection.insert_fixture(row, the_table_name)
+            end
+          end
+        end
+        # FIXME: The right way to do this is to fork the oracle enhanced adapter
+        # and implement a reset_pk_sequence! method, this is what ActiveRecord::Fixtures
+        # calls.  aka this code should be eliminated/live elsewhere.
         case ActiveRecord::Base.connection.adapter_name
         when /oracle/i
-          # TODO: MUST REDO WITHOUT USING model
           if model.column_names.include? "id"
             sequence_name = model.sequence_name.to_s
             max_id = model.maximum(:id)
@@ -98,6 +108,7 @@ module Fe
         end
       end
     end
+
     # Returns a hash with model class names for keys and Set's of AR
     # instances for values
     # aka like this
