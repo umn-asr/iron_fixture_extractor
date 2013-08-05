@@ -1,7 +1,17 @@
 module Fe
   class Extractor
-    attr_accessor :input_array, :extract_code, :name, :row_counts,:table_names, :manifest_hash
+    attr_accessor :input_array,
+      :extract_code,
+      :name,
+      :row_counts,
+      :table_names,
+      :table_name_to_model_name_hash,
+      :manifest_hash
 
+    ##################
+    #   PUBLIC API   #
+    ##################
+    #
     def extract
       load_input_array_by_executing_extract_code
       @row_counts = {}
@@ -19,7 +29,8 @@ module Fe
                         :name => self.name,
                         :model_names => self.model_names,
                         :row_counts => self.row_counts,
-                        :table_names => self.models.map {|m| m.table_name}
+                        :table_names => self.models.map {|m| m.table_name},
+                        :table_name_to_model_name_hash => self.models.inject({}) {|h,m| h[m.table_name] = m.to_s; h }
                        }
       File.open(self.manifest_file_path,'w') do |file|
         file.write(@manifest_hash.to_yaml)
@@ -27,68 +38,56 @@ module Fe
       self.write_model_fixtures
     end
 
-    # This is called from 2 types of invocations
-    #   Fe.extract('Post.all', :name => :bla)
-    #   or 
-    #   Fe.extract('[Post.all,Comment.all]', :name => :bla2)
-    #   
-    def load_from_args(active_relation_or_array,*args)
-      options = args.extract_options!
-      @name = (options[:name] || Time.now.strftime("%Y_%m_%d_%H_%M_%S")).to_sym
-      if active_relation_or_array.kind_of? String
-        @extract_code = active_relation_or_array 
-      else
-        raise "Extract code must be a string, so .rebuild can be called"
-      end
-    end
-
-    def load_input_array_by_executing_extract_code
-      @input_array = Array(eval(@extract_code)).to_a
-    end
-
-    def load_from_manifest
-      raise "u gotta set .name to use this method" if self.name.blank?
-      @manifest_hash = YAML.load_file(self.manifest_file_path)
-      @extract_code = @manifest_hash[:extract_code]
-      @name = @manifest_hash[:name]
-      @models = @manifest_hash[:model_names].map {|x| x.constantize}
-    end
-
-    def map_models_hash=(map_models_hash)
-      unless (map_models_hash.keys - self.models).empty?
-        raise InvalidSourceModelToMapFrom.new "your map models hash must contain keys representing class names that exist in the fe_manifest.yml"
-      end
-      @map_models_hash = map_models_hash
-    end
-
-    def map_models_hash
-      if @map_models_hash.nil?
-        {}
-      else
-        @map_models_hash
-      end
-    end
-
-
     # Loads data from each fixture file in the extract set using
     # ActiveRecord::Fixtures
     #
-    def load_into_database
+    def load_into_database(options={})
       # necessary to make multiple invocations possible in a single test
       # case possible
       ActiveRecord::Fixtures.reset_cache
-      self.models.each do |model|
-        if self.map_models_hash.has_key?(model)
-          raise "Unfortunately, this is not implemented...from the implementation of .create_fixtures it seems impossible...keeping this code in case its not"
-          h = {model.table_name => self.map_models_hash[model]}
-          ActiveRecord::Fixtures.create_fixtures(self.target_path, model.table_name, h)
+
+      # Filter down the models to load if specified
+      the_tables = if options.has_key?(:only)
+        self.table_names.select {|x| Array(options[:only]).include?(x) }
+      elsif options.has_key?(:except)
+        self.table_names.select {|x| !Array(options[:except]).include?(x) }
+      else
+        self.table_names
+      end
+      raise "No models to load, relax your :only or :except filters (or don't bother calling this method)" if the_tables.empty?
+
+      the_tables.each do |table_name|
+        if options[:map].nil?
+          # Vanilla create_fixtures will work fine when no mapping is being used
+          ActiveRecord::Fixtures.create_fixtures(self.target_path, table_name)
+          next
         else
-          ActiveRecord::Fixtures.create_fixtures(self.target_path, model.table_name)
+          # Map table_name via a function (great for prefixing)
+          new_table_name = if options[:map].kind_of?(Proc)
+            options[:map].call(table_name)
+          # Map table_name via a Hash table name mapping
+          elsif options[:map][table_name].kind_of? String
+            options[:map][table_name]
+          else
+            table_name # No mapping for this table name
+          end
+          class_name = self.table_name_to_model_name_hash[table_name]
+          fixtures = ActiveRecord::Fixtures.new( ActiveRecord::Base.connection,
+              new_table_name,
+              class_name,
+              ::File.join(self.target_path, table_name))
+          fixtures.table_rows.each do |the_table_name,rows|
+            rows.each do |row|
+              ActiveRecord::Base.connection.insert_fixture(row, the_table_name)
+            end
+          end
         end
+        # FIXME: The right way to do this is to fork the oracle enhanced adapter
+        # and implement a reset_pk_sequence! method, this is what ActiveRecord::Fixtures
+        # calls.  aka this code should be eliminated/live elsewhere.
         case ActiveRecord::Base.connection.adapter_name
         when /oracle/i
           if model.column_names.include? "id"
-            count = model.count
             sequence_name = model.sequence_name.to_s
             max_id = model.maximum(:id)
             next_id = max_id.nil? ? 1 : max_id.to_i + 1
@@ -109,6 +108,7 @@ module Fe
         end
       end
     end
+
     # Returns a hash with model class names for keys and Set's of AR
     # instances for values
     # aka like this
@@ -165,19 +165,48 @@ module Fe
       end
       @fixture_hashes[model_name]
     end
+
+
+    #############################
+    #   OVERLOADED CONSTRUCTORS #
+    #############################
+    #
+    # * These are used by the Fe module to setup the Extractor object
+    # This is called from 2 types of invocations
+    #   Fe.extract('Post.all', :name => :bla)
+    #   or 
+    #   Fe.extract('[Post.all,Comment.all]', :name => :bla2)
+    #   
+    def load_from_args(active_relation_or_array,*args)
+      options = args.extract_options!
+      @name = (options[:name] || Time.now.strftime("%Y_%m_%d_%H_%M_%S")).to_sym
+      if active_relation_or_array.kind_of? String
+        @extract_code = active_relation_or_array 
+      else
+        raise "Extract code must be a string, so .rebuild can be called"
+      end
+    end
+
+    def load_input_array_by_executing_extract_code
+      @input_array = Array(eval(@extract_code)).to_a
+    end
+
+    def load_from_manifest
+      raise "u gotta set .name to use this method" if self.name.blank?
+      @manifest_hash = YAML.load_file(self.manifest_file_path)
+      @extract_code = @manifest_hash[:extract_code]
+      @name = @manifest_hash[:name]
+      @models = @manifest_hash[:model_names].map {|x| x.constantize}
+      @row_counts = @manifest_hash[:row_counts]
+      @table_names = @manifest_hash[:table_names]
+      @table_name_to_model_name_hash = @manifest_hash[:table_name_to_model_name_hash]
+    end
+
     protected
 
     # Recursively goes over all association_cache's from the record and builds the output_hash
     # This is the meat-and-potatoes of this tool (plus the the recurse
     # method) is where something interesting is happening
-    #
-    # TODO: To work with ActiveRecord 2.3.x, we'll need to recurse using this logic: (from activerecord-2.3.14/lib/active_record/associations.rb)
-    #    # Clears out the association cache
-    #    def clear_association_cache #:nodoc:
-    #      self.class.reflect_on_all_associations.to_a.each do |assoc|
-    #        instance_variable_set "@#{assoc.name}", nil
-    #      end unless self.new_record?
-    #    end
     #
     def recurse(record)
       raise "This gem only knows how to extract stuff w ActiveRecord" unless record.kind_of? ActiveRecord::Base

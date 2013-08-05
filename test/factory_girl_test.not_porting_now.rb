@@ -1,7 +1,9 @@
-# WARNING: THIS IS AN EXPERIMENTAL FEATURE THAT ISN'T QUITE COMPLETE AND MIGHT BE DEPRECATED
-# WARNING: THIS IS AN EXPERIMENTAL FEATURE THAT ISN'T QUITE COMPLETE AND MIGHT BE DEPRECATED
-# WARNING: THIS IS AN EXPERIMENTAL FEATURE THAT ISN'T QUITE COMPLETE AND MIGHT BE DEPRECATED
-# WARNING: THIS IS AN EXPERIMENTAL FEATURE THAT ISN'T QUITE COMPLETE AND MIGHT BE DEPRECATED
+# About
+# =====
+#
+# This feature is being deprecated in favor of eventually writing a spec  demonstrating
+# how to use this with FactoryGirl
+#
 # require 'test_helper'
 # require 'factory_girl'
 # class FactoryGirlTest < ActiveSupport::TestCase

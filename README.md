@@ -27,7 +27,7 @@ it will allow you to:
 
 ## Usage
 
-### *Extract* fixture set (typically run in a rails console)
+### *Extract* fixture set (typically run in a irb console)
 
     Fe.extract 'Post.includes(:comments, :author).limit(1)', :name =>  'first_post_w_comments_and_authors'
     # or for multi-model extraction something like this:
@@ -37,6 +37,24 @@ it will allow you to:
 ### *Load* fixture set into database (typically run in a "setup" test method )
 
     Fe.load_db(:first_post_w_comments_and_authors)
+
+If your fixture set is huge, you can avoid loading particular tables with:
+
+    Fe.load_db(:first_post_w_comments_and_authors, :only => 'posts')
+
+Or 
+
+    Fe.load_db(:first_post_w_comments_and_authors, :except => ['comments'])
+
+You can also load to a table name different than the source they were extracted from via a Hash or Proc:
+
+Via Proc: (this will add "a_prefix_" to all target tables)
+
+    Fe.load_db(:first_post_w_comments_and_authors, :map => -> table_name { "a_prefix_#{table_name}" })
+
+Via Hash: (just maps posts to different table, the others stay the same)
+
+    Fe.load_db(:first_post_w_comments_and_authors, :map => {'posts' => 'different_posts'})
 
 ### *Load particular fixture into memory* (typically used to instantiate an object or build a factory)
 
@@ -142,41 +160,17 @@ The essense of the Fe.extract "algorithm" is:
 * Works on MRI 1.9.3 and 1.9.2
 * Does not work on JRuby, 1.8.7
 
-## If you want to help out/todos
-
-* Test on Rails 4 
-* Get this to work on JRuby: jigger the Gemfile, .gemspec, and
-  test_helper.rb
-* If you give a non-string arg to .extract, the manifest should resolve
-  the .extract_code to be a bunch of look-ups by primary key ala [Post.find(1),Comment.find(2)].
-* The output of each of the main commands should be meaningful, aka,
-  make extractor implement a sensible .to_s and .inspect 
-* load_db should error if Rails.env or RAILS_ENV is defined and set to
-  production
-* An :extract_schema option passed to .extract that uses `rake db:structure:dump` functionality 
-  or ActiveRecord::Base.connection.structure_dump to create .sql files containing a "create table" statement
-  for each distinct model class.  This would allow you to completely de-couple your test cases + fixtures
-  from the external databases they were extracted from.
-
 ## Contributing
-To run test cases:
 
-    # clone or fork repo
-    cd iron_fixture_extractor
-    rake # runs test cases
+In a nutshell:
 
-Help on the missing features above would be much appreciated per the
-usual github approach:
+    git clone     # get the code
+    cd <the dir>
+    rake          # run the tests
+    # make a spec file and hack.
 
-1. Fork it
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Ensure the test cases run
-4. Copy one of the test cases (like basic_test.rb), rename, rip out the guts, and add some tests + code to the app
-5. Commit your changes (`git commit -am 'Added some feature'`)
-6. Push to the branch (`git push origin my-new-feature`)
-7. Create new Pull Request
+See spec/README_FOR_DEVELOPERS.md for more details.
 
-If you have other ideas for this tool, make a Github Issue.
 
 
 #### TODO: JOE REPLACE THE ABOVE CONTENT WITH THIS METHOD

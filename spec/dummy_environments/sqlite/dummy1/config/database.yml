@@ -1,0 +1,11 @@
+source:
+  adapter: sqlite3
+  database: spec/tmp/source.sqlite3
+  pool: 5
+  timeout: 5000
+
+target:
+  adapter: sqlite3
+  database: spec/tmp/target.sqlite3
+  pool: 5
+  timeout: 5000

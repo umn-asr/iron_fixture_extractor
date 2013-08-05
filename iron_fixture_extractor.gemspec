@@ -16,6 +16,4 @@ Gem::Specification.new do |gem|
   gem.version       = Fe::VERSION
   gem.add_runtime_dependency "activerecord", "~> 3.2.1"
   gem.add_runtime_dependency "activesupport", "~> 3.2.1"
-  gem.add_development_dependency "shoulda", "~> 3.0.1"
-  gem.add_development_dependency "sqlite3"
 end

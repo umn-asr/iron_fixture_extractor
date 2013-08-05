@@ -1,3 +1,9 @@
+## 1.0.0 -> 1.1.0
+* Shouldn't be any breaking changes, mostly a switch to rspec for
+testing.
+
+* Added Fe.load_db(...) :only, :except, and :map options
+
 ## 0.1.1 -> 1.0.0
 * Fe.extract must be given a string or array of ActiveRecord queries
   like this
