@@ -48,9 +48,9 @@ module Fe
 
       # Filter down the models to load if specified
       the_tables = if options.has_key?(:only)
-        self.table_names.select {|x| Array(options[:only]).include?(x) }
+        self.table_names.select {|x| Array(options[:only]).map(&:to_s).include?(x) }
       elsif options.has_key?(:except)
-        self.table_names.select {|x| !Array(options[:except]).include?(x) }
+        self.table_names.select {|x| !Array(options[:except]).map(&:to_s).include?(x) }
       else
         self.table_names
       end
