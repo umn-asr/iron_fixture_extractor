@@ -217,10 +217,11 @@ module Fe
       raise "This gem only knows how to extract stuff w ActiveRecord" unless record.kind_of? ActiveRecord::Base
       key = record.class.base_class.to_s # the base_class is key for correctly handling STI
       @output_hash[key] ||= Set.new # Set ensures no duplicates
+      return if @output_hash[key].include?(record) # Prevent infinite loops as association cache on record with inverse_of will cause this method to stack overflow
       @output_hash[key].add(record)
       record.association_cache.each_pair do |assoc_name,association_def|
         Array(association_def.target).each do |a|
-          self.recurse(a)
+          self.recurse(a)  
         end
       end
     end
