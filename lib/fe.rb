@@ -122,7 +122,10 @@ module Fe
         when /mysql|oracle|postgresql/i
           # Its dumb that this isn't in active record natively
           # https://github.com/rails/rails/issues/5510
-          ActiveRecord::Base.connection.execute("truncate table #{model.table_name}")
+          sql = "truncate table #{model.table_name}"
+          # Postgresql flag to cascade delete for foreign key referenced tables
+          sql << " CASCADE" if ActiveRecord::Base.connection.adapter_name == 'PostgreSQL'
+          ActiveRecord::Base.connection.execute(sql)
         else
           model.delete_all
         end
