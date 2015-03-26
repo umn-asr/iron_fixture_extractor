@@ -13,17 +13,18 @@ Gem::Specification.new do |spec|
   spec.homepage    = "https://github.com/umn-asr/iron_fixture_extractor"
   spec.license     = 'MIT'
 
-  spec.files         = `git ls-files`.split($\)
-  spec.executables   = spec.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
-  spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
-  spec.require_paths = ["lib"]
-
-
-  spec.add_runtime_dependency "activerecord", "~> 3.2.1"
-  spec.add_runtime_dependency "activesupport", "~> 3.2.1"
-  spec.add_development_dependency "rspec", "~> 2.14.0"
-  spec.add_development_dependency "rspec-fire", "= 1.3.0"
-  spec.add_development_dependency "rake", "~> 10.0"
-  spec.add_development_dependency "sqlite3"
-  spec.add_development_dependency "shoulda"
+  gem.files         = `git ls-files`.split($\)
+  gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
+  gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
+  gem.name          = "iron_fixture_extractor"
+  gem.require_paths = ["lib"]
+  gem.version       = Fe::VERSION
+  gem.add_runtime_dependency "activerecord", "~> 4.0"
+  gem.add_runtime_dependency "activesupport", "~> 4.0"
+  gem.add_development_dependency "rspec", "~> 2.14.0"
+  gem.add_development_dependency "rspec-fire", "= 1.3.0"
+  gem.add_development_dependency "rake", "~> 10.0"
+  gem.add_development_dependency "sqlite3"
+  gem.add_development_dependency "shoulda"
+  gem.license = 'MIT'
 end
