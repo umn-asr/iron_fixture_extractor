@@ -4,8 +4,11 @@
 #
 class SerializedAttributeEncoder
   def load(value)
-    value.constantize.new
+    if value
+      value.constantize.new
+    end
   end
+
   def dump(object)
     object.class.to_s
   end
