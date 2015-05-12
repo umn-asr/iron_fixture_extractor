@@ -5,7 +5,7 @@ class CreateComments < ActiveRecord::Migration
       t.belongs_to :post
       t.string :content
 
-      t.timestamps
+      t.timestamps null: true
     end
     add_index :comments, :author_id
     add_index :comments, :post_id

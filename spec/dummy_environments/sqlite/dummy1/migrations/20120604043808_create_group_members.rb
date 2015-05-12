@@ -5,7 +5,7 @@ class CreateGroupMembers < ActiveRecord::Migration
       t.belongs_to :group
       t.string :role
 
-      t.timestamps
+      t.timestamps null: true
     end
     add_index :group_members, :author_id
     add_index :group_members, :group_id

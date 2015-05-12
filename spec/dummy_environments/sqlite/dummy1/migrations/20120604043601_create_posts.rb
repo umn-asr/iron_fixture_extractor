@@ -6,7 +6,7 @@ class CreatePosts < ActiveRecord::Migration
       t.string :content
       t.string :serialized_thing
 
-      t.timestamps
+      t.timestamps null: true
     end
     add_index :posts, :author_id
   end
