@@ -7,7 +7,7 @@ class CreateDifferentPosts < ActiveRecord::Migration
       t.string :content
       t.string :serialized_thing
 
-      t.timestamps
+      t.timestamps null: true
     end
     add_index :different_posts, :author_id
   end
