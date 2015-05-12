@@ -296,13 +296,28 @@ module Fe
             fixture_name = "r#{Array(record.id).join('_')}"
             hash[fixture_name] = record.attributes
             # dump serialized attributes
-            record.serialized_attributes.each do |attr, serializer|
+            serialized_attributes(record).each do |attr, serializer|
               hash[fixture_name][attr] = serializer.dump(hash[fixture_name][attr])
             end
             hash
           }.to_yaml
         end
       end
+    end
+
+    def serialized_attributes(record)
+      ar_class = record.class
+      if defined?(::ActiveRecord::Type::Serialized)
+        # Rails 5+
+        ar_class.columns.select do |column|
+          column.cast_type.is_a?(::ActiveRecord::Type::Serialized)
+        end.inject({}) do |hash, column|
+           hash[column.name.to_s] = column.cast_type.coder
+           hash
+        end
+      else
+         ar_class.serialized_attributes
+       end
     end
   end
 end
