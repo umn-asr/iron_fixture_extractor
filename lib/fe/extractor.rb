@@ -125,24 +125,7 @@ module Fe
             # Vanilla create_fixtures will work fine when no mapping is being used
             ActiveRecord::FixtureSet.create_fixtures(self.target_path, table_name)
           else
-            # Map table_name via a function (great for prefixing)
-            new_table_name = if options[:map].kind_of?(Proc)
-              options[:map].call(table_name)
-            # Map table_name via a Hash table name mapping
-            elsif options[:map][table_name].kind_of? String
-              options[:map][table_name]
-            else
-              table_name # No mapping for this table name
-            end
-            fixtures = ActiveRecord::FixtureSet.new( ActiveRecord::Base.connection,
-                new_table_name,
-                class_name,
-                ::File.join(self.target_path, table_name))
-            fixtures.table_rows.each do |the_table_name,rows|
-              rows.each do |row|
-                ActiveRecord::Base.connection.insert_fixture(row, the_table_name)
-              end
-            end
+            deprecated_map_behavior(class_name, table_name, options[:map])
           end
           # FIXME: The right way to do this is to fork the oracle enhanced adapter
           # and implement a reset_pk_sequence! method, this is what ActiveRecord::Fixtures
@@ -302,6 +285,36 @@ module Fe
             hash
           }.to_yaml
         end
+      end
+    end
+
+    private
+
+    def deprecated_map_behavior(class_name, original_table_name, map_option)
+      ActiveSupport::Deprecation.warn(<<-WARNING.strip_heredoc)
+        As of ActiveRecord 4, ActiveRecord::FixtureSet no longer supports strong-arming the table name. This feature will be removed soon.
+      WARNING
+      new_table_name = mapped_table_name(original_table_name, map_option)
+      fixtures = ActiveRecord::FixtureSet.new( ActiveRecord::Base.connection,
+          new_table_name,
+          class_name,
+          ::File.join(self.target_path, original_table_name))
+      fixtures.instance_variable_set(:@table_name, new_table_name)
+      fixtures.table_rows.each do |table_name,rows|
+        rows.each do |row|
+          ActiveRecord::Base.connection.insert_fixture(row, table_name)
+        end
+      end
+    end
+
+    def mapped_table_name(original_table_name, map_option)
+      if map_option.kind_of?(Proc)
+        map_option.call(original_table_name)
+      # Map table_name via a Hash table name mapping
+      elsif map_option[original_table_name].kind_of? String
+        map_option[original_table_name]
+      else
+        original_table_name # No mapping for this table name
       end
     end
 
