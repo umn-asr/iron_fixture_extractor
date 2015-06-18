@@ -47,6 +47,12 @@ module Fe
       extractor
     end
 
+    def fact(extract_name, key)
+      extractor = Fe::Extractor.new
+      extractor.name = extract_name
+      extractor.fact(key)
+    end
+
 
     # Used if you want to get a hash representation of a particular
     # fixture in a fixture set for a given model

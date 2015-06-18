@@ -46,6 +46,11 @@ module Fe
       self.write_model_fixtures
     end
 
+    def fact(key)
+      manifest_hash = YAML.load_file(self.manifest_file_path)
+      manifest_hash.fetch(:fact_hash, {}).fetch(key)
+    end
+
     # Loads data from each fixture file in the extract set using
     # ActiveRecord::Fixtures
     #
