@@ -20,15 +20,30 @@ module Fe
     end
 
     def add_fact(name, value)
+      #extractor = Fe::Extractor.new
+      #extractor.name = extract_name
+      #extractor.load_from_manifest
+      #extractor.fact_hash[fact_name] = fact
+      #extractor.write_manifest_yml # write it
+      #extractor.load_from_manifest # reload it
+      #extractor.fact_hash[fact_name] # return it
     end
 
     def fact(name)
+      #extractor = Fe::Extractor.new
+      #extractor.name = extract_name
+      #extractor.load_from_manifest
+      #if extractor.fact_hash.has_key?(fact_name)
+        #extractor.fact_hash[fact_name]
+      #else
+        #raise "no fact called #{extractor.fact_hash} for #{extract_name} fixtures"
+      #end
     end
 
     def initialize
-      # This delays the constraint checked to the end of the transaction allowing inserting rows out of order when tables have foreign key to each other. 
-      # Solves also teh issue with truncating when foreign keys are present. 
-      # TODO: adapt this to other databases if needed 
+      # This delays the constraint checked to the end of the transaction allowing inserting rows out of order when tables have foreign key to each other.
+      # Solves also teh issue with truncating when foreign keys are present.
+      # TODO: adapt this to other databases if needed
       ActiveRecord::Base.connection.execute("SET CONSTRAINTS ALL DEFERRED") if ActiveRecord::Base.connection.adapter_name == 'PostgreSQL'
     end
 

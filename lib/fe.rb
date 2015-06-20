@@ -30,8 +30,7 @@ module Fe
     # NOTE: This is destructive, it will delete everything in the target table
     #
     def load_db(extract_name, options={})
-      extractor = Fe::Extractor.new
-      extractor.name = extract_name
+      extractor = Fe::Extractor.build(extract_name)
       extractor.load_from_manifest
       extractor.load_into_database(options)
       extractor
@@ -40,8 +39,7 @@ module Fe
     # Rebuilds an existing fixture set from a fe_manifest.yml
     #
     def rebuild(extract_name)
-      extractor = Fe::Extractor.new
-      extractor.name = extract_name
+      extractor = Fe::Extractor.build(extract_name)
       extractor.load_from_manifest
       extractor.extract
       extractor
@@ -60,9 +58,8 @@ module Fe
     # in the console
     #
     def get_hash(extract_name, model_name, fixture_name)
-      model_name = model_name.to_s 
-      extractor = Fe::Extractor.new
-      extractor.name = extract_name
+      model_name = model_name.to_s
+      extractor = Fe::Extractor.build(extract_name)
 
       begin
         h=extractor.fixture_hash_for_model(model_name)
@@ -103,8 +100,7 @@ module Fe
     # Execute the ActiveRecord query associated with the extract set
     #
     def execute_extract_code(extract_name)
-      extractor = Fe::Extractor.new
-      extractor.name = extract_name
+      extractor = Fe::Extractor.build(extract_name)
       extractor.load_from_manifest
       extractor.load_input_array_by_executing_extract_code
       extractor.input_array
@@ -114,8 +110,7 @@ module Fe
     # Truncate all tables referenced in an extract set
     #
     def truncate_tables_for(extract_name)
-      extractor = Fe::Extractor.new
-      extractor.name = extract_name
+      extractor = Fe::Extractor.build(extract_name)
       extractor.load_from_manifest
       extractor.models.each do |model|
         case ActiveRecord::Base.connection.adapter_name
