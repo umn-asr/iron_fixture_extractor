@@ -1,10 +1,6 @@
-IMPORTANT: This particular repo is no longer maintained. If you are looking for usage in a Rails 4.x project, please look at the [downstream forks of this project](https://github.com/joegoggins/iron_fixture_extractor/network).  Also, if there is anyone out there who would like to take on the ownership/maintainer role for this tool, please ping us via a GitHub issue--it would be way cooler to have one authoritative copy of the tool rather than a bunch of forks.
-
-# About Iron Fixture Extractor
+# Iron Fixture Extractor
 
 For extracting complex data from staging and production databases to be used for automated testing.
-
-
 
 Its best when:
 
@@ -13,17 +9,13 @@ Its best when:
 
 ## Use cases
 
-* Pulling data from a staging database containing vetted data that has
-  been built up by the development team, users, or business analysts to be loaded and used
-  as "archetypical" data structures in test cases or demos.
+* Pulling data from a staging database containing vetted data that has been built up by the development team, users, or business analysts to be loaded and used as "archetypical" data structures in test cases or demos.
 
-* Taking snapshots of production data that has triggered app exceptions 
-  to be more closely inspected and incorporated into test cases.
+* Taking snapshots of production data that has triggered app exceptions to be more closely inspected and incorporated into test cases.
 
 ## How it works
 
-  Feed it an array of ActiveRecord objects or ActiveRelation object and
-it will allow you to:
+Feed it an array of ActiveRecord objects or ActiveRelation object and it will allow you to:
 
 * extract data to .yml fixtures
 * load it into a database or memory
@@ -33,69 +25,100 @@ it will allow you to:
 
 ### *Extract* fixture set (typically run in a irb console)
 
-    Fe.extract 'Post.includes(:comments, :author).limit(1)', :name =>  'first_post_w_comments_and_authors'
-    # or for multi-model extraction something like this:
-    x = '[UserRole.all, Project.includes(:contributors => [:bio])]'
-    Fe.extract(x,:name => :all_permissions_and_all_projects)
+```ruby
+Fe.extract('Post.includes(:comments, :author).limit(1)', :name =>  'first_post_w_comments_and_authors')
+```
+
+or for multi-model extraction something like this:
+
+```ruby
+Fe.extract('[UserRole.all, Project.includes(:contributors => [:bio])]' ,:name => :all_permissions_and_all_projects)
+```
 
 ### *Load* fixture set into database (typically run in a "setup" test method )
 
-    Fe.load_db(:first_post_w_comments_and_authors)
+```ruby
+Fe.load_db(:first_post_w_comments_and_authors)
+```
 
 If your fixture set is huge, you can avoid loading particular tables with:
 
-    Fe.load_db(:first_post_w_comments_and_authors, :only => 'posts')
+```ruby
+Fe.load_db(:first_post_w_comments_and_authors, :only => 'posts')
+```
 
 Or 
 
-    Fe.load_db(:first_post_w_comments_and_authors, :except => ['comments'])
+```ruby
+Fe.load_db(:first_post_w_comments_and_authors, :except => ['comments'])
+```
 
 You can also load to a table name different than the source they were extracted from via a Hash or Proc:
 
 Via Proc: (this will add "a_prefix_" to all target tables)
 
-    Fe.load_db(:first_post_w_comments_and_authors, :map => -> table_name { "a_prefix_#{table_name}" })
+```ruby
+Fe.load_db(:first_post_w_comments_and_authors, :map => -> table_name { "a_prefix_#{table_name}" })
+```
 
 Via Hash: (just maps posts to different table, the others stay the same)
 
-    Fe.load_db(:first_post_w_comments_and_authors, :map => {'posts' => 'different_posts'})
+```ruby
+Fe.load_db(:first_post_w_comments_and_authors, :map => {'posts' => 'different_posts'})
+```
 
 ### *Load particular fixture into memory* (typically used to instantiate an object or build a factory)
 
-    # 'r1' is the fixture's name, all fixture names start with 'r', 1 is the id
-    Fe.get_hash(:first_post_w_comments_and_authors, Post, 'r1')
+'r1' is the fixture's name, all fixture names start with 'r', 1 is the id
+```ruby
+Fe.get_hash(:first_post_w_comments_and_authors, Post, 'r1')
+```
 
-    # You can specify :first, or :last to the last arg
-    Fe.get_hash(:first_post_w_comments_and_authors, Comment, :first)
+You can specify :first, or :last to the last arg
+```ruby
+Fe.get_hash(:first_post_w_comments_and_authors, Comment, :first)
+```
 
-    # Get the hash representation of the whole fixture file
-    Fe.get_hash(:first_post_w_comments_and_authors, Comment, :all)
+Get the hash representation of the whole fixture file
+```ruby
+Fe.get_hash(:first_post_w_comments_and_authors, Comment, :all)
+```
 
-    # Get an array of hashes stored in a fixture file
-    Fe.get_hashes(:first_post_w_comments_and_authors, Comment)
+Get an array of hashes stored in a fixture file
+```ruby
+Fe.get_hashes(:first_post_w_comments_and_authors, Comment)
+```
 
 This feature is used to instantiate objects from the hash or define factories like:
 
-    # Create factory from a particular hash within a fixture file
-    Factory.create(:the_post) do
-      h=Fe.get_hash(:first_post_w_comments_and_authors, Post, :first)
-      name h.name
-    end
+Create factory from a particular hash within a fixture file
 
-    or
+```ruby
+Factory.create(:the_post) do
+  h=Fe.get_hash(:first_post_w_comments_and_authors, Post, :first)
+  name h.name
+end
+```
+or create an instance
 
-    # Create an instance
-    h=Fe.get_hash(:first_post_w_comments_and_authors, Post, :first)
-    ye_old_post=Post.new(h)
+```ruby
+h=Fe.get_hash(:first_post_w_comments_and_authors, Post, :first)
+ye_old_post=Post.new(h)
+```
 
 ### *Rebuild* fixture files associated with the initial extraction (also doable via rake task in Rails)
 
-    Fe.rebuild(:first_post_w_comments_and_authors)
-    # Make sure to `diff` your test/fe_fixtures dir to see what has changed in .yml files
+```ruby
+Fe.rebuild(:first_post_w_comments_and_authors)
+```
+
+Make sure to `diff` your test/fe_fixtures dir to see what has changed in .yml files
 
 ### *Truncate tables* associated with a fixture set (if you're not using DatabaseCleaner)
 
-    Fe.truncate_tables_for(:first_post_w_comments_and_authors)
+```ruby
+Fe.truncate_tables_for(:first_post_w_comments_and_authors)
+```
 
 ## Installation
 
@@ -124,15 +147,15 @@ By modifying the :extract_code: field, you can change the extraction
 behavior associated with .rebuild. It can be handy if you want to add
 data to a fixture set.
 
-## Dirt Simple Shiznit
+## The Basic Algorithm
 
-The essense of the Fe.extract "algorithm" is:
+The essence of the Fe.extract "algorithm" is:
 
-    for each record given to Fe.extract
-      recursively resolve any association pre-loaded in the .association_cache [ActiveRecord] method
-      add it to a set of records keyed by model name
-    write each set of records as a <TheModel.table_name>.yml fixture
-    write a fe_manifest.yml containing original query, row counts, etc
+- for each record given to Fe.extract
+  - recursively resolve any association pre-loaded in the .association_cache [ActiveRecord] method
+  - add it to a set of records keyed by model name
+- write each set of records as a <TheModel.table_name>.yml fixture
+- write a fe_manifest.yml containing original query, row counts, etc
 
 ## Typical Workflow 
 * Data extracted from a dev, staging, or production db is needed
@@ -174,8 +197,6 @@ In a nutshell:
     # make a spec file and hack.
 
 See spec/README_FOR_DEVELOPERS.md for more details.
-
-
 
 #### TODO: JOE REPLACE THE ABOVE CONTENT WITH THIS METHOD
 Alternatively, another way to lower the barrier to contributing is to submodule the Gem into your project
@@ -222,4 +243,4 @@ ruby gems, thanks to the authors of these pages:
 * http://asciicasts.com/episodes/158-factories-not-fixtures
 
 ## Author
-Joe Goggins
+Joe Goggins, UMN ASR Custom Solutions
