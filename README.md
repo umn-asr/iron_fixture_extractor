@@ -5,7 +5,7 @@
 
 For extracting complex data from staging and production databases to be used for automated testing.
 
-Its best when:
+It's best when:
 
 * your data is too complex for factories
 * creating and maintaining manual fixtures is cumbersome and brittle
