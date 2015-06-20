@@ -33,17 +33,32 @@ module Fe
         FileUtils.remove_dir(self.target_path,:force => true)
       end
       FileUtils.mkdir_p(self.target_path)
+      build_manifest_hash
+      write_manifest_yml
+      write_model_fixtures
+    end
+
+    def build_manifest_hash
       @manifest_hash = {:extract_code => self.extract_code,
                         :name => self.name,
                         :model_names => self.model_names,
                         :row_counts => self.row_counts,
                         :table_names => self.models.map {|m| m.table_name},
-                        :table_name_to_model_name_hash => self.models.inject({}) {|h,m| h[m.table_name] = m.to_s; h }
+                        :table_name_to_model_name_hash => self.models.inject({}) {|h,m| h[m.table_name] = m.to_s; h },
+                        :fact_hash => {}
                        }
+    end
+
+
+    def write_manifest_yml
       File.open(self.manifest_file_path,'w') do |file|
         file.write(@manifest_hash.to_yaml)
       end
-      self.write_model_fixtures
+    end
+
+
+    def fact_hash
+      @manifest_hash.fetch(:fact_hash, {})
     end
 
     # Loads data from each fixture file in the extract set using
