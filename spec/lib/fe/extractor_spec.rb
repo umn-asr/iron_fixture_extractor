@@ -27,4 +27,13 @@ describe Fe::Extractor do
       end
     end
   end
+
+  describe "build" do
+    it "returns an instance of Fe:Extractor with the extract name" do
+      extract_name = "test_extract"
+      built = Fe::Extractor.build(extract_name)
+      expect(built.name).to eq(extract_name)
+      expect(built).to be_a(Fe::Extractor)
+    end
+  end
 end
