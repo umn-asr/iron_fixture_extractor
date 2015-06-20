@@ -1,0 +1,18 @@
+AllCops:
+  Exclude:
+    - '**/*.gemspec'
+    - 'bin/**/*'
+    - 'spec/spec_helper.rb'
+    - 'vendor/bundle/**/*'
+
+Documentation:
+  Enabled: false
+
+Style/IfUnlessModifier:
+  MaxLineLength: 0
+
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
+
+Metrics/LineLength:
+  Max: 800
