@@ -187,8 +187,7 @@ The essence of the Fe.extract "algorithm" is:
 
 ## Gem Compatibility
 
-* Works on MRI 1.9.3 and 1.9.2
-* Does not work on JRuby, 1.8.7
+* Tested on all versions of Ruby listed in our [.travis.yml](Travis Configuration)
 
 ## Contributing
 
@@ -246,4 +245,4 @@ ruby gems, thanks to the authors of these pages:
 * http://asciicasts.com/episodes/158-factories-not-fixtures
 
 ## Author
-Joe Goggins, UMN ASR Custom Solutions
+Joe Goggins & UMN ASR Custom Solutions
