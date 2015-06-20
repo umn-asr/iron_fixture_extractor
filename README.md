@@ -1,8 +1,11 @@
+[![Code Climate](https://codeclimate.com/github/umn-asr/iron_fixture_extractor/badges/gpa.svg)](https://codeclimate.com/github/umn-asr/iron_fixture_extractor)
+[![Build Status](https://travis-ci.org/umn-asr/iron_fixture_extractor.svg?branch=master)](https://travis-ci.org/umn-asr/iron_fixture_extractor)
+
 # Iron Fixture Extractor
 
 For extracting complex data from staging and production databases to be used for automated testing.
 
-Its best when:
+It's best when:
 
 * your data is too complex for factories
 * creating and maintaining manual fixtures is cumbersome and brittle
