@@ -19,6 +19,12 @@ module Fe
       e
     end
 
+    def add_fact(name, value)
+    end
+
+    def fact(name)
+    end
+
     def initialize
       # This delays the constraint checked to the end of the transaction allowing inserting rows out of order when tables have foreign key to each other. 
       # Solves also teh issue with truncating when foreign keys are present. 

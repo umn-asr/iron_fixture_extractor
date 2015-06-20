@@ -22,6 +22,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "activerecord", "~> 3.2.1"
   spec.add_runtime_dependency "activesupport", "~> 3.2.1"
   spec.add_development_dependency "rspec", "~> 2.14.0"
+  spec.add_development_dependency "rspec-fire", "= 1.3.0"
   spec.add_development_dependency "rake", "~> 10.0"
   spec.add_development_dependency "sqlite3"
   spec.add_development_dependency "shoulda"

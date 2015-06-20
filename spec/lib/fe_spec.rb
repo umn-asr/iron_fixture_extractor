@@ -1,13 +1,14 @@
 require 'spec_helper'
 
 describe Fe do
-  let(:extractor_double) { Fe::Extractor.new }
+  let(:extractor_class_double) { class_double("Fe::Extractor").as_stubbed_const }
+  let(:extractor_double) { instance_double("Fe::Extractor") }
   let(:extract_name) { 'test_extract' }
   let(:fact_name) { 'test_fact' }
   let(:fact_value) { rand }
 
   before do
-    allow(Fe::Extractor).to receive(:build).with(extract_name).and_return(extractor_double)
+    allow(extractor_class_double).to receive(:build).with(extract_name).and_return(extractor_double)
   end
 
   describe "create_fact" do
