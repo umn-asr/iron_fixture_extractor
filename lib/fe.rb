@@ -6,7 +6,7 @@ module Fe
   require 'fe/railtie' if defined?(Rails)
 
   # global configuration
-   
+
   @@fixtures_root = 'test/fe_fixtures'
   mattr_accessor :fixtures_root
 
@@ -15,7 +15,7 @@ module Fe
     # Extract a set up Yml for one or more active relation alls
     # You can call this in two ways
     #   Fe.extract('Post.all', :name => :bla)
-    #   or 
+    #   or
     #   Fe.extract('[Post.all,Comment.all]', :name => :bla2)
     #
     def extract(*args)
