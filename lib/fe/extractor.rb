@@ -13,6 +13,17 @@ module Fe
     ##################
     #
 
+    def self.build_from_manifest(name, manifest_hash = nil)
+      e = self.build(name)
+      if manifest_hash
+        e.manifest_hash = manifest_hash
+      else
+        e.manifest_hash = YAML.load_file(e.manifest_file_path)
+      end
+      e.load_from_manifest
+      e
+    end
+
     def self.build(name)
       e = self.new
       e.name = name
@@ -252,13 +263,11 @@ module Fe
     end
 
     def load_from_manifest
-      raise "u gotta set .name to use this method" if self.name.blank?
-      @manifest_hash = YAML.load_file(self.manifest_file_path)
-      @extract_code = @manifest_hash[:extract_code]
-      @name = @manifest_hash[:name]
-      @models = @manifest_hash[:model_names].map {|x| x.constantize}
-      @row_counts = @manifest_hash[:row_counts]
-      @table_names = @manifest_hash[:table_names]
+      @extract_code                  = @manifest_hash[:extract_code]
+      @name                          = @manifest_hash[:name]
+      @models                        = @manifest_hash.fetch(:model_names, []).map {|x| x.constantize}
+      @row_counts                    = @manifest_hash[:row_counts]
+      @table_names                   = @manifest_hash[:table_names]
       @table_name_to_model_name_hash = @manifest_hash[:table_name_to_model_name_hash]
     end
 

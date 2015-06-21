@@ -36,4 +36,33 @@ describe Fe::Extractor do
       expect(built).to be_a(Fe::Extractor)
     end
   end
+
+  describe "build_from_manifest" do
+    let(:extract_name)  { "test_extract" }
+    let(:manifest_hash) { {test_manifest: "test", name: extract_name} }
+
+    describe "when provdied a hash" do
+      it "returns an instance of Fe:Extractor with the provided hash. " do
+        built = Fe::Extractor.build_from_manifest(extract_name, manifest_hash)
+        expect(built.name).to eq(extract_name)
+        expect(built.manifest_hash).to eq(manifest_hash)
+        expect(built).to be_a(Fe::Extractor)
+      end
+
+      #check git blame for more information on this test
+      it "The name in the hash can override the provided name " do
+        manifest_hash[:name] = "some_other_name"
+        built = Fe::Extractor.build_from_manifest(extract_name, manifest_hash)
+        expect(built.name).to eq("some_other_name")
+      end
+    end
+
+    describe "when not provided a hash" do
+      it "uses the content of a file to populate manifest_hash" do
+        expect(YAML).to receive(:load_file).with(any_args).and_return(manifest_hash)
+        built = Fe::Extractor.build_from_manifest(extract_name)
+        expect(built.manifest_hash).to eq(manifest_hash)
+      end
+    end
+  end
 end
