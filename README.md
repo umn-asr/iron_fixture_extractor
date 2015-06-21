@@ -109,6 +109,23 @@ h=Fe.get_hash(:first_post_w_comments_and_authors, Post, :first)
 ye_old_post=Post.new(h)
 ```
 
+### Setting facts and using them in testing
+
+Within a fixture you can set facts that you can then use in tests. To set a fact:
+
+```ruby
+fact_value = 200
+Fe.create_fact('fixture_name', 'fact_name', fact_value)
+Fe.fact('fixture_name', 'fact_name')
+#=> 200
+```
+
+Within a test:
+
+```
+expect(thing_under_test).to eq(Fe.fact(:fixture_name, :fact_name))
+```
+
 ### *Rebuild* fixture files associated with the initial extraction (also doable via rake task in Rails)
 
 ```ruby
