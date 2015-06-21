@@ -8,7 +8,7 @@ describe Fe do
   let(:fact_value) { rand }
 
   before do
-    allow(extractor_class_double).to receive(:build).with(extract_name).and_return(extractor_double)
+    allow(extractor_class_double).to receive(:build_from_manifest).with(extract_name).and_return(extractor_double)
   end
 
   describe "create_fact" do
