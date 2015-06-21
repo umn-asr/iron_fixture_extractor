@@ -125,12 +125,12 @@ module Fe
     end
 
     def create_fact(extract_name, fact_name, fact_value)
-      e = Fe::Extractor.build(extract_name)
+      e = Fe::Extractor.build_from_manifest(extract_name)
       e.add_fact(fact_name, fact_value)
     end
 
     def fact(extract_name, fact_name)
-      e = Fe::Extractor.build(extract_name)
+      e = Fe::Extractor.build_from_manifest(extract_name)
       e.fact(fact_name)
     end
   end

@@ -30,25 +30,15 @@ module Fe
       e
     end
 
-    def add_fact(name, value)
-      #extractor = Fe::Extractor.new
-      #extractor.name = extract_name
-      #extractor.load_from_manifest
-      #extractor.fact_hash[fact_name] = fact
-      #extractor.write_manifest_yml # write it
-      #extractor.load_from_manifest # reload it
-      #extractor.fact_hash[fact_name] # return it
+    def add_fact(fact_name, fact_value)
+      fact_hash[fact_name] = fact_value
+      write_manifest_yml
+      load_from_manifest
+      fact_hash[fact_name]
     end
 
-    def fact(name)
-      #extractor = Fe::Extractor.new
-      #extractor.name = extract_name
-      #extractor.load_from_manifest
-      #if extractor.fact_hash.has_key?(fact_name)
-        #extractor.fact_hash[fact_name]
-      #else
-        #raise "no fact called #{extractor.fact_hash} for #{extract_name} fixtures"
-      #end
+    def fact(fact_name)
+      fact_hash.fetch(fact_name)
     end
 
     def initialize
@@ -96,7 +86,10 @@ module Fe
 
 
     def fact_hash
-      @manifest_hash.fetch(:fact_hash, {})
+      @fact_hash ||= @manifest_hash.fetch(:fact_hash) {
+        @manifest_hash[:fact_hash] = {}
+        @manifest_hash[:fact_hash]
+      }
     end
 
     # Loads data from each fixture file in the extract set using

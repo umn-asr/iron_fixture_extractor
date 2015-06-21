@@ -28,6 +28,50 @@ describe Fe::Extractor do
     end
   end
 
+  describe "setting and getting facts" do
+    let(:fact_value) { rand }
+
+    describe "when there is no fact hash in the manifest" do
+      let(:manifest_hash) { {} }
+
+      it "add_fact puts the fact to the fact hash, and fact retrieves it" do
+        extractor = Fe::Extractor.build_from_manifest("test", manifest_hash)
+        returned = extractor.add_fact(:new_fact, fact_value)
+        expect(returned).to eq(fact_value)
+        expect(extractor.fact(:new_fact)).to eq(fact_value)
+      end
+    end
+
+    describe "when there is a fact hash in the manifest" do
+      let(:manifest_hash) { {:fact_hash => {test: fact_value} } }
+
+      it "add_fact puts the fact to the fact hash, and fact retrieves it" do
+        extractor = Fe::Extractor.build_from_manifest("test", manifest_hash)
+        returned = extractor.add_fact(:new_fact, fact_value)
+        expect(returned).to eq(fact_value)
+        expect(extractor.fact(:new_fact)).to eq(fact_value)
+      end
+    end
+
+
+    it "persists the fact" do
+      `mkdir spec/tmp/fe_fixtures/test/`
+      extractor = Fe::Extractor.build_from_manifest("test", {name: "test"})
+      extractor.add_fact(:new_fact, fact_value)
+
+      other_extractor = Fe::Extractor.build_from_manifest("test")
+      expect(other_extractor.fact(:new_fact)).to eq(fact_value)
+      `rm -rf spec/tmp/fe_fixtures/test`
+    end
+
+    describe "when the fact does not exist" do
+      it "raises an error" do
+        extractor = Fe::Extractor.build_from_manifest("test", {name: "test"})
+        expect { extractor.fact(:no_fact) }.to raise_error
+      end
+    end
+  end
+
   describe "build" do
     it "returns an instance of Fe:Extractor with the extract name" do
       extract_name = "test_extract"
