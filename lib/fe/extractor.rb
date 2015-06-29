@@ -13,10 +13,38 @@ module Fe
     ##################
     #
 
+    def self.build_from_manifest(name, manifest_hash = nil)
+      e = self.build(name)
+      if manifest_hash
+        e.manifest_hash = manifest_hash
+      else
+        e.manifest_hash = YAML.load_file(e.manifest_file_path)
+      end
+      e.load_from_manifest
+      e
+    end
+
+    def self.build(name)
+      e = self.new
+      e.name = name
+      e
+    end
+
+    def add_fact(fact_name, fact_value)
+      fact_hash[fact_name] = fact_value
+      write_manifest_yml
+      load_from_manifest
+      fact_hash[fact_name]
+    end
+
+    def fact(fact_name)
+      fact_hash.fetch(fact_name)
+    end
+
     def initialize
-      # This delays the constraint checked to the end of the transaction allowing inserting rows out of order when tables have foreign key to each other. 
-      # Solves also teh issue with truncating when foreign keys are present. 
-      # TODO: adapt this to other databases if needed 
+      # This delays the constraint checked to the end of the transaction allowing inserting rows out of order when tables have foreign key to each other.
+      # Solves also teh issue with truncating when foreign keys are present.
+      # TODO: adapt this to other databases if needed
       ActiveRecord::Base.connection.execute("SET CONSTRAINTS ALL DEFERRED") if ActiveRecord::Base.connection.adapter_name == 'PostgreSQL'
     end
 
@@ -33,17 +61,35 @@ module Fe
         FileUtils.remove_dir(self.target_path,:force => true)
       end
       FileUtils.mkdir_p(self.target_path)
+      build_manifest_hash
+      write_manifest_yml
+      write_model_fixtures
+    end
+
+    def build_manifest_hash
       @manifest_hash = {:extract_code => self.extract_code,
                         :name => self.name,
                         :model_names => self.model_names,
                         :row_counts => self.row_counts,
                         :table_names => self.models.map {|m| m.table_name},
-                        :table_name_to_model_name_hash => self.models.inject({}) {|h,m| h[m.table_name] = m.to_s; h }
+                        :table_name_to_model_name_hash => self.models.inject({}) {|h,m| h[m.table_name] = m.to_s; h },
+                        :fact_hash => {}
                        }
+    end
+
+
+    def write_manifest_yml
       File.open(self.manifest_file_path,'w') do |file|
         file.write(@manifest_hash.to_yaml)
       end
-      self.write_model_fixtures
+    end
+
+
+    def fact_hash
+      @fact_hash ||= @manifest_hash.fetch(:fact_hash) {
+        @manifest_hash[:fact_hash] = {}
+        @manifest_hash[:fact_hash]
+      }
     end
 
     # Loads data from each fixture file in the extract set using
@@ -176,7 +222,7 @@ module Fe
       if @fixture_hashes.nil?
         @fixture_hashes = {}
       end
-      if @fixture_hashes.has_key?(model_name) 
+      if @fixture_hashes.has_key?(model_name)
         @fixture_hashes[model_name]
       else
         @fixture_hashes[model_name] = YAML.load_file(self.fixture_path_for_model(model_name))
@@ -192,14 +238,14 @@ module Fe
     # * These are used by the Fe module to setup the Extractor object
     # This is called from 2 types of invocations
     #   Fe.extract('Post.all', :name => :bla)
-    #   or 
+    #   or
     #   Fe.extract('[Post.all,Comment.all]', :name => :bla2)
-    #   
+    #
     def load_from_args(active_relation_or_array,*args)
       options = args.extract_options!
       @name = (options[:name] || Time.now.strftime("%Y_%m_%d_%H_%M_%S")).to_sym
       if active_relation_or_array.kind_of? String
-        @extract_code = active_relation_or_array 
+        @extract_code = active_relation_or_array
       else
         raise "Extract code must be a string, so .rebuild can be called"
       end
@@ -210,13 +256,11 @@ module Fe
     end
 
     def load_from_manifest
-      raise "u gotta set .name to use this method" if self.name.blank?
-      @manifest_hash = YAML.load_file(self.manifest_file_path)
-      @extract_code = @manifest_hash[:extract_code]
-      @name = @manifest_hash[:name]
-      @models = @manifest_hash[:model_names].map {|x| x.constantize}
-      @row_counts = @manifest_hash[:row_counts]
-      @table_names = @manifest_hash[:table_names]
+      @extract_code                  = @manifest_hash[:extract_code]
+      @name                          = @manifest_hash[:name]
+      @models                        = @manifest_hash.fetch(:model_names, []).map {|x| x.constantize}
+      @row_counts                    = @manifest_hash[:row_counts]
+      @table_names                   = @manifest_hash[:table_names]
       @table_name_to_model_name_hash = @manifest_hash[:table_name_to_model_name_hash]
     end
 
@@ -234,7 +278,7 @@ module Fe
       @output_hash[key].add(record)
       record.association_cache.each_pair do |assoc_name,association_def|
         Array(association_def.target).each do |a|
-          self.recurse(a)  
+          self.recurse(a)
         end
       end
     end
