@@ -6,7 +6,7 @@ module Fe
   require 'fe/railtie' if defined?(Rails)
 
   # global configuration
-   
+
   @@fixtures_root = 'test/fe_fixtures'
   mattr_accessor :fixtures_root
 
@@ -15,7 +15,7 @@ module Fe
     # Extract a set up Yml for one or more active relation alls
     # You can call this in two ways
     #   Fe.extract('Post.all', :name => :bla)
-    #   or 
+    #   or
     #   Fe.extract('[Post.all,Comment.all]', :name => :bla2)
     #
     def extract(*args)
@@ -30,9 +30,7 @@ module Fe
     # NOTE: This is destructive, it will delete everything in the target table
     #
     def load_db(extract_name, options={})
-      extractor = Fe::Extractor.new
-      extractor.name = extract_name
-      extractor.load_from_manifest
+      extractor = Fe::Extractor.build_from_manifest(extract_name)
       extractor.load_into_database(options)
       extractor
     end
@@ -40,9 +38,7 @@ module Fe
     # Rebuilds an existing fixture set from a fe_manifest.yml
     #
     def rebuild(extract_name)
-      extractor = Fe::Extractor.new
-      extractor.name = extract_name
-      extractor.load_from_manifest
+      extractor = Fe::Extractor.build_from_manifest(extract_name)
       extractor.extract
       extractor
     end
@@ -60,9 +56,8 @@ module Fe
     # in the console
     #
     def get_hash(extract_name, model_name, fixture_name)
-      model_name = model_name.to_s 
-      extractor = Fe::Extractor.new
-      extractor.name = extract_name
+      model_name = model_name.to_s
+      extractor = Fe::Extractor.build(extract_name)
 
       begin
         h=extractor.fixture_hash_for_model(model_name)
@@ -103,9 +98,7 @@ module Fe
     # Execute the ActiveRecord query associated with the extract set
     #
     def execute_extract_code(extract_name)
-      extractor = Fe::Extractor.new
-      extractor.name = extract_name
-      extractor.load_from_manifest
+      extractor = Fe::Extractor.build_from_manifest(extract_name)
       extractor.load_input_array_by_executing_extract_code
       extractor.input_array
     end
@@ -114,9 +107,7 @@ module Fe
     # Truncate all tables referenced in an extract set
     #
     def truncate_tables_for(extract_name)
-      extractor = Fe::Extractor.new
-      extractor.name = extract_name
-      extractor.load_from_manifest
+      extractor = Fe::Extractor.build_from_manifest(extract_name)
       extractor.models.each do |model|
         case ActiveRecord::Base.connection.adapter_name
         when /mysql|oracle|postgresql/i
@@ -132,6 +123,15 @@ module Fe
       end
       true
     end
+
+    def create_fact(extract_name, fact_name, fact_value)
+      e = Fe::Extractor.build_from_manifest(extract_name)
+      e.add_fact(fact_name, fact_value)
+    end
+
+    def fact(extract_name, fact_name)
+      e = Fe::Extractor.build_from_manifest(extract_name)
+      e.fact(fact_name)
+    end
   end
 end
-

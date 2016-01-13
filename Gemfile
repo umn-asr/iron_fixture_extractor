@@ -1,10 +1,4 @@
-source 'https://rubygems.org'
+source "https://rubygems.org"
 
-group :test do
-  gem "rspec"
-  gem 'sqlite3'
-  gem 'debugger'
-  gem 'shoulda'
-  gem 'rake'
-end
+# Specify your gem's dependencies in query_string_search.gemspec
 gemspec
