@@ -276,7 +276,11 @@ module Fe
           # below
           file.write records.inject({}) {|hash, record|
             # Array() bit done to support composite primary keys
-            fixture_name = "r#{Array(record.id).join('_')}"
+            if record.id.nil?
+              fixture_name = "r#{record.attributes.values.join('_')}"
+            else
+              fixture_name = "r#{Array(record.id).join('_')}"
+            end
             hash[fixture_name] = record.attributes
             # dump serialized attributes
             serialized_attributes(record).each do |attr, serializer|
