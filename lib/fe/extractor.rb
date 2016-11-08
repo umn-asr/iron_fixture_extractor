@@ -327,15 +327,19 @@ module Fe
       ar_class = record.class
       if defined?(::ActiveRecord::Type::Serialized)
         # Rails 5+
-        ar_class.columns.select do |column|
-          column.cast_type.is_a?(::ActiveRecord::Type::Serialized)
-        end.inject({}) do |hash, column|
-           hash[column.name.to_s] = column.cast_type.coder
-           hash
+        serializable_attributes(record).inject({}) do |hash, attribute|
+          hash[attribute] = record.class.type_for_attribute(attribute).coder
+          hash
         end
       else
          ar_class.serialized_attributes
        end
+    end
+
+    def serializable_attributes(record)
+      record.class.column_names.select do |name|
+        record.class.type_for_attribute(name).is_a?(::ActiveRecord::Type::Serialized)
+      end
     end
   end
 end
