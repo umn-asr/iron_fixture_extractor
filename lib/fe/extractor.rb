@@ -259,7 +259,8 @@ module Fe
       @output_hash[key] ||= Set.new # Set ensures no duplicates
       return if @output_hash[key].include?(record) # Prevent infinite loops as association cache on record with inverse_of will cause this method to stack overflow
       @output_hash[key].add(record)
-      record.association_cache.each_pair do |assoc_name,association_def|
+      association_cache = record.instance_variable_get(:@association_cache)
+      association_cache.each_pair do |assoc_name,association_def|
         Array(association_def.target).each do |a|
           self.recurse(a)
         end

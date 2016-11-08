@@ -8,7 +8,7 @@ describe "Fe.execute_extract_code" do
     Fe.load_db(@extract_name)
     rows = Fe.execute_extract_code(@extract_name)
     expect(rows.length).to eql(@extractor.row_counts['Post'])
-    expect(rows.first.association_cache.keys - [:comments,:author]).to be_empty, "Comments and authors should be eager loaded"
+    expect(rows.first.instance_variable_get(:@association_cache).keys - [:comments,:author]).to be_empty, "Comments and authors should be eager loaded"
   end
 
   it "ensures the test env is all good..there are no rows" do
