@@ -8,7 +8,7 @@ describe "Fe.execute_extract_code" do
     Fe.load_db(@extract_name)
     rows = Fe.execute_extract_code(@extract_name)
     expect(rows.length).to eql(@extractor.row_counts['Post'])
-    expect(rows.first.instance_variable_get(:@association_cache).keys - [:comments,:author]).to be_empty, "Comments and authors should be eager loaded"
+    expect(loaded_association_names(rows.first) - [:comments,:author]).to be_empty, "Comments and authors should be eager loaded"
   end
 
   it "ensures the test env is all good..there are no rows" do
@@ -25,5 +25,11 @@ describe "Fe.execute_extract_code" do
     @extractor.row_counts.each_pair do |m,c|
       expect(m.constantize.count).to eql(c), "number of rows in the target should be the same as the counts from the source given the extract_code"
     end
+  end
+
+  def loaded_association_names(record)
+    record.class.reflect_on_all_associations.select do |reflection|
+      record.association(reflection.name).loaded?
+    end.map(&:name)
   end
 end

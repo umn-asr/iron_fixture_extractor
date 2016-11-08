@@ -259,9 +259,8 @@ module Fe
       @output_hash[key] ||= Set.new # Set ensures no duplicates
       return if @output_hash[key].include?(record) # Prevent infinite loops as association cache on record with inverse_of will cause this method to stack overflow
       @output_hash[key].add(record)
-      association_cache = record.instance_variable_get(:@association_cache)
-      association_cache.each_pair do |assoc_name,association_def|
-        Array(association_def.target).each do |a|
+      loaded_associations(record).each do |association_def|
+        Array(record.association(association_def.name).target).each do |a|
           self.recurse(a)
         end
       end
@@ -294,6 +293,12 @@ module Fe
     end
 
     private
+
+    def loaded_associations(record)
+      record.class.reflect_on_all_associations.select do |reflection|
+        record.association(reflection.name).loaded?
+      end
+    end
 
     def deprecated_map_behavior(class_name, original_table_name, map_option)
       ActiveSupport::Deprecation.warn(<<-WARNING.strip_heredoc)
