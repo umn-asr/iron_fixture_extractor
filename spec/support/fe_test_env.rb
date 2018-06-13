@@ -53,10 +53,21 @@ class FeTestEnv
 
   # WORKER HELPERS
   def run_migrations
-    ActiveRecord::Migrator.migrate("#{root_path}/migrations/",nil)
+    if ActiveRecord.version >= Gem::Version.new("5.2")
+      migration_context = ActiveRecord::MigrationContext.new("#{root_path}/migrations/")
+      migration_context.migrate
+    else
+      ActiveRecord::Migrator.migrate("#{root_path}/migrations/",nil)
+    end
   end
+
   def run_data_migrations
-    ActiveRecord::Migrator.migrate("#{root_path}/data_migrations/",nil)
+    if ActiveRecord.version >= Gem::Version.new("5.2")
+      migration_context = ActiveRecord::MigrationContext.new("#{root_path}/data_migrations/")
+      migration_context.migrate
+    else
+      ActiveRecord::Migrator.migrate("#{root_path}/data_migrations/",nil)
+    end
   end
 
   # File & directory location accessors (provides full path)
