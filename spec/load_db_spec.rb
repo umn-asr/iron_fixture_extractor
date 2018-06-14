@@ -2,6 +2,35 @@ require 'spec_helper'
 
 describe "Fe.load_db" do
   include FirstPostWCommentsAndAuthors
+
+  context "running tests in an ActiveRecord transaction" do
+    before(:each) do
+      FeTestEnv.instance.connect_to_target
+      FeTestEnv.instance.create_tables_in('target')
+    end
+
+    class TestThatUsesFe < ActiveSupport::TestCase
+
+      def test_uses_fe
+        @extract_name = :first_post_w_comments_and_authors
+        Fe.load_db(@extract_name)
+      end
+    end
+
+    it "putting something in a database that uses Fe and cleans up at the end" do
+      # puts data into db with Fe
+      # checks that db is empty at end of transaction
+
+      test = TestThatUsesFe.new("some_test")
+      test.test_uses_fe
+
+      @model_names.each do |mn|
+        expect(mn.constantize.count).to eql(0)
+      end
+
+    end
+  end
+
   it "ensures the test env is all good..there are no rows" do
     FeTestEnv.instance.connect_to_target
     FeTestEnv.instance.create_tables_in('target')
