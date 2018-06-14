@@ -1,4 +1,4 @@
-class CreateSomeData < ActiveRecord::Migration
+class CreateSomeData < ActiveRecord::Migration[4.2]
   def up
     a=Author.create :name => "Joe"
     p1=a.posts.create :name => "First post", :serialized_thing => ComplexThing.new

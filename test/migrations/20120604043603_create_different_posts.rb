@@ -1,4 +1,4 @@
-class CreateDifferentPosts < ActiveRecord::Migration
+class CreateDifferentPosts < ActiveRecord::Migration[4.2]
   # DUPLICATED FROM Posts
   def change
     create_table :different_posts do |t|
