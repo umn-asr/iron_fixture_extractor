@@ -10,7 +10,7 @@ describe "Fe.load_db" do
     end
 
     class TestThatUsesFe < ActiveSupport::TestCase
-
+      include ActiveRecord::TestFixtures
       def test_uses_fe
         @extract_name = :first_post_w_comments_and_authors
         Fe.load_db(@extract_name)
@@ -20,9 +20,18 @@ describe "Fe.load_db" do
     it "putting something in a database that uses Fe and cleans up at the end" do
       # puts data into db with Fe
       # checks that db is empty at end of transaction
+      @model_names.each do |mn|
+        expect(mn.constantize.count).to eql(0)
+      end
 
-      test = TestThatUsesFe.new("some_test")
-      test.test_uses_fe
+
+      # test = TestThatUsesFe.new("some_test")
+      # test.test_uses_fe
+      t = Thread.new do
+        Minitest.run_one_method(TestThatUsesFe, :test_uses_fe)
+      end
+
+      t.join
 
       @model_names.each do |mn|
         expect(mn.constantize.count).to eql(0)
