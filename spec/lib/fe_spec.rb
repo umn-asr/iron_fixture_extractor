@@ -13,7 +13,7 @@ describe Fe do
 
   describe "create_fact" do
     it "uses Extractor's fact setter" do
-      extractor_double.should_receive(:add_fact).with(fact_name, fact_value).and_return(fact_value)
+      expect(extractor_double).to receive(:add_fact).with(fact_name, fact_value).and_return(fact_value)
       returned = Fe.create_fact(extract_name, fact_name, fact_value)
       expect(returned).to eq(fact_value)
     end
@@ -21,7 +21,7 @@ describe Fe do
 
   describe "fact" do
     it "uses Extractor's fact getter" do
-      extractor_double.should_receive(:fact).with(fact_name).and_return(fact_value)
+      expect(extractor_double).to receive(:fact).with(fact_name).and_return(fact_value)
       returned = Fe.fact(extract_name, fact_name)
       expect(returned).to eq(fact_value)
     end

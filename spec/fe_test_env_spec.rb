@@ -19,7 +19,7 @@ describe "desired behavior" do
     @fe_test_env.create_rows_in('source')
     expect(Post.first).to be_a_kind_of(Post)
     @fe_test_env.connect_to_target
-    expect {Post.first}.to raise_exception
+    expect {Post.first}.to raise_exception { |error| error.class.name.include?("ActiveRecord") }
     @fe_test_env.create_tables_in('target')
     expect(Post.first).to be_nil
   end

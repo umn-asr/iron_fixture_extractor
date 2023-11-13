@@ -67,7 +67,7 @@ describe Fe::Extractor do
     describe "when the fact does not exist" do
       it "raises an error" do
         extractor = Fe::Extractor.build_from_manifest("test", {name: "test"})
-        expect { extractor.fact(:no_fact) }.to raise_error
+        expect { extractor.fact(:no_fact) }.to raise_error KeyError
       end
     end
   end

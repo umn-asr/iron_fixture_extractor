@@ -80,7 +80,7 @@ describe "Fe.load_db" do
     it "raises an exception no models result after the :only or :except filters" do
       expect {
         Fe.load_db(@extract_name, :except => ['authors', 'comments','posts'] )
-      }.to raise_exception
+      }.to raise_exception /No models to load/
     end
   end
 end
