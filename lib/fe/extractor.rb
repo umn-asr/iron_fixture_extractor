@@ -208,7 +208,7 @@ module Fe
       if @fixture_hashes.has_key?(model_name)
         @fixture_hashes[model_name]
       else
-        @fixture_hashes[model_name] = YAML.load_file(self.fixture_path_for_model(model_name))
+        @fixture_hashes[model_name] = YAML.unsafe_load_file(self.fixture_path_for_model(model_name))
       end
       @fixture_hashes[model_name]
     end
