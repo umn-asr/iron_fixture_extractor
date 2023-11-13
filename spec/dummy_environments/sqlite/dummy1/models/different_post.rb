@@ -4,5 +4,5 @@ class DifferentPost < ActiveRecord::Base
   # and used to test fixture loading to a model
   # different from the one it was extracted from
   # so behavior doesn't matter
-  serialize :serialized_thing, SerializedAttributeEncoder.new
+  serialize :serialized_thing, coder: SerializedAttributeEncoder.new
 end
