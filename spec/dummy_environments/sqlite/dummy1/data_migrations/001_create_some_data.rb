@@ -1,3 +1,7 @@
+ActiveRecord.yaml_column_permitted_classes += [
+  ComplexThing
+]
+
 class CreateSomeData < ActiveRecord::Migration[4.2]
   def up
     a=Author.create :name => "Joe"
