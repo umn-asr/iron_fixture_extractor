@@ -12,6 +12,10 @@ module Fe
 
   # Top-level API methods
   class << self
+    def deprecator
+      @deprecator ||= ActiveSupport::Deprecation.new("2.0", "Fe")
+    end
+
     # Extract a set up Yml for one or more active relation alls
     # You can call this in two ways
     #   Fe.extract('Post.all', :name => :bla)

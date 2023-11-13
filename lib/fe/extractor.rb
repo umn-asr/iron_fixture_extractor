@@ -118,7 +118,7 @@ module Fe
           class_name = if self.table_name_to_model_name_hash.kind_of?(Hash)
             self.table_name_to_model_name_hash[table_name]
           else
-            ActiveSupport::Deprecation.warn "your fe_manifest.yml does not contain a table_name_to_model_name_hash (as found in 1.0.0 or earlier). Version 2.0.0 will require this. See test cases for how to manually jigger your fe_manifest.ymls to function."
+            Fe.deprecator.warn "your fe_manifest.yml does not contain a table_name_to_model_name_hash (as found in 1.0.0 or earlier). Version 2.0.0 will require this. See test cases for how to manually jigger your fe_manifest.ymls to function."
             nil
           end
           if options[:map].nil?
@@ -301,7 +301,7 @@ module Fe
     end
 
     def deprecated_map_behavior(class_name, original_table_name, map_option)
-      ActiveSupport::Deprecation.warn(<<-WARNING.strip_heredoc)
+      Fe.deprecator.warn(<<-WARNING.strip_heredoc)
         As of ActiveRecord 4, ActiveRecord::FixtureSet no longer supports strong-arming the table name. This feature will be removed soon.
       WARNING
       new_table_name = mapped_table_name(original_table_name, map_option)
