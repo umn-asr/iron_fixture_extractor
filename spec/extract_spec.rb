@@ -23,9 +23,9 @@ describe "Fe.extract and Fe::Extractor instances" do
   end
   it "should put data into the .yml files" do
     expect(Post.table_name).to eql(@extractor.table_names['Post'])
-    expect(File.exists?(File.join(Fe.fixtures_root,'first_post_w_comments_and_authors','fe_manifest.yml'))).to eql(true)
+    expect(File.exist?(File.join(Fe.fixtures_root,'first_post_w_comments_and_authors','fe_manifest.yml'))).to eql(true)
     @model_names.each do |mn|
-      expect(File.exists?(File.join(Fe.fixtures_root,'first_post_w_comments_and_authors',"#{mn.constantize.table_name}.yml"))).to eql(true)
+      expect(File.exist?(File.join(Fe.fixtures_root,'first_post_w_comments_and_authors',"#{mn.constantize.table_name}.yml"))).to eql(true)
     end
 
     # Asserting the state of the imported data--tied to the data_migrations

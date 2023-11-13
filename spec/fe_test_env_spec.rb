@@ -51,7 +51,7 @@ describe "structure of a dummy environment" do
     expect(ActiveRecord::Base.connection).to be_a_kind_of(ActiveRecord::ConnectionAdapters::SQLite3Adapter)
     ActiveRecord::Base.connection.execute('create table t (id int)')
     expect(ActiveRecord::Base.connection.tables.length).to eql(1)
-    expect(File.exists?(source_db)).to eql(true)
+    expect(File.exist?(source_db)).to eql(true)
 
     # TARGET
     #
@@ -59,7 +59,7 @@ describe "structure of a dummy environment" do
     target_db = @fe_test_env.database_dot_yml_hash['target']['database']
     expect(ActiveRecord::Base.connection.instance_variable_get(:@config)[:database]).to eql(target_db)
     expect(ActiveRecord::Base.connection.tables.length).to eql(0)  # there is no table in target
-    expect(File.exists?(target_db)).to eql(true)
+    expect(File.exist?(target_db)).to eql(true)
   end
 end
 
