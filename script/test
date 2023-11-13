@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# script/test: Tells Docker to run the test suite. Run this one from your local machine
+
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+docker run --rm \
+  -v `pwd`:/app \
+  iron_fixture_extractor:development

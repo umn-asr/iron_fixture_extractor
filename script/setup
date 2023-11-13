@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# script/setup: Set up the container we will use to run the tests
+
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+docker build -t iron_fixture_extractor:development .
