@@ -110,50 +110,55 @@ module Fe
       end
       raise "No models to load, relax your :only or :except filters (or don't bother calling this method)" if the_tables.empty?
 
-
-      #This wraps all the inserts into a single transaction allowing the constraint check to happen at the end.
-      ActiveRecord::Base.transaction do
-
-        the_tables.each do |table_name|
-          class_name = if self.table_name_to_model_name_hash.kind_of?(Hash)
-            self.table_name_to_model_name_hash[table_name]
-          else
-            Fe.deprecator.warn "your fe_manifest.yml does not contain a table_name_to_model_name_hash (as found in 1.0.0 or earlier). Version 2.0.0 will require this. See test cases for how to manually jigger your fe_manifest.ymls to function."
-            nil
-          end
-          if options[:map].nil?
-            # Vanilla create_fixtures will work fine when no mapping is being used
-            ActiveRecord::FixtureSet.create_fixtures(self.target_path, table_name)
-          else
-            deprecated_map_behavior(class_name, table_name, options[:map])
-          end
-          # FIXME: The right way to do this is to fork the oracle enhanced adapter
-          # and implement a reset_pk_sequence! method, this is what ActiveRecord::Fixtures
-          # calls.  aka this code should be eliminated/live elsewhere.
-          case ActiveRecord::Base.connection.adapter_name
-          when /oracle/i
-            model = class_name.constantize
-            if model.column_names.include? "id"
-              sequence_name = model.sequence_name.to_s
-              max_id = model.maximum(:id)
-              next_id = max_id.nil? ? 1 : max_id.to_i + 1
-              begin
-                ActiveRecord::Base.connection.execute("drop sequence #{sequence_name}")
-              rescue
-                puts "[Iron Fixture Extractor] WARNING: couldnt drop the sequence #{sequence_name}, (but who cares!)"
-              end
-              begin
-                q="create sequence #{sequence_name} increment by 1 start with #{next_id}"
-                ActiveRecord::Base.connection.execute(q)
-              rescue
-                puts "[Iron Fixture Extractor] WARNING: couldnt create the sequence #{sequence_name}"
-              end
-            end
-          else
-            # Do nothing, only oracle adapters need this
-          end
+      if ActiveRecord::Base.connection.open_transactions.zero?
+        ActiveRecord::Base.transaction do
+          perform_inserts(the_tables, options)
         end
-      end # End transaction
+      else
+        perform_inserts(the_tables, options)
+      end
+    end
+
+    def perform_inserts(the_tables, options)
+      the_tables.each do |table_name|
+        class_name = if self.table_name_to_model_name_hash.kind_of?(Hash)
+                       self.table_name_to_model_name_hash[table_name]
+                     else
+                       Fe.deprecator.warn "your fe_manifest.yml does not contain a table_name_to_model_name_hash (as found in 1.0.0 or earlier). Version 2.0.0 will require this. See test cases for how to manually jigger your fe_manifest.ymls to function."
+                       nil
+                     end
+        if options[:map].nil?
+          # Vanilla create_fixtures will work fine when no mapping is being used
+          ActiveRecord::FixtureSet.create_fixtures(self.target_path, table_name)
+        else
+          deprecated_map_behavior(class_name, table_name, options[:map])
+        end
+        # FIXME: The right way to do this is to fork the oracle enhanced adapter
+        # and implement a reset_pk_sequence! method, this is what ActiveRecord::Fixtures
+        # calls.  aka this code should be eliminated/live elsewhere.
+        case ActiveRecord::Base.connection.adapter_name
+        when /oracle/i
+          model = class_name.constantize
+          if model.column_names.include? "id"
+            sequence_name = model.sequence_name.to_s
+            max_id = model.maximum(:id)
+            next_id = max_id.nil? ? 1 : max_id.to_i + 1
+            begin
+              ActiveRecord::Base.connection.execute("drop sequence #{sequence_name}")
+            rescue
+              puts "[Iron Fixture Extractor] WARNING: couldnt drop the sequence #{sequence_name}, (but who cares!)"
+            end
+            begin
+              q="create sequence #{sequence_name} increment by 1 start with #{next_id}"
+              ActiveRecord::Base.connection.execute(q)
+            rescue
+              puts "[Iron Fixture Extractor] WARNING: couldnt create the sequence #{sequence_name}"
+            end
+          end
+        else
+          # Do nothing, only oracle adapters need this
+        end
+      end
     end
 
     # Returns a hash with model class names for keys and Set's of AR
