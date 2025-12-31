@@ -143,17 +143,7 @@ module Fe
             sequence_name = model.sequence_name.to_s
             max_id = model.maximum(:id)
             next_id = max_id.nil? ? 1 : max_id.to_i + 1
-            begin
-              ActiveRecord::Base.connection.execute("drop sequence #{sequence_name}")
-            rescue
-              puts "[Iron Fixture Extractor] WARNING: couldnt drop the sequence #{sequence_name}, (but who cares!)"
-            end
-            begin
-              q="create sequence #{sequence_name} increment by 1 start with #{next_id}"
-              ActiveRecord::Base.connection.execute(q)
-            rescue
-              puts "[Iron Fixture Extractor] WARNING: couldnt create the sequence #{sequence_name}"
-            end
+            reset_oracle_sequence_to!(sequence_name, next_id)
           end
         else
           # Do nothing, only oracle adapters need this
@@ -343,12 +333,41 @@ module Fe
         end
       else
          ar_class.serialized_attributes
-       end
+      end
     end
 
     def serializable_attributes(record)
       record.class.column_names.select do |name|
         record.class.type_for_attribute(name).is_a?(::ActiveRecord::Type::Serialized)
+      end
+    end
+
+    def reset_oracle_sequence_to!(sequence_name, next_id)
+      current = begin
+        ActiveRecord::Base.connection.select_value("select #{sequence_name}.nextval from dual").to_i
+      rescue
+        nil
+      end
+
+      if current.nil?
+        begin
+          q = "create sequence #{sequence_name} increment by 1 start with #{next_id}"
+          ActiveRecord::Base.connection.execute(q)
+        rescue
+          puts "[Iron Fixture Extractor] WARNING: couldnt create the sequence #{sequence_name}"
+        end
+        return
+      end
+
+      delta = next_id.to_i - current.to_i
+      return if delta == 0
+
+      begin
+        ActiveRecord::Base.connection.execute("alter sequence #{sequence_name} increment by #{delta}")
+        ActiveRecord::Base.connection.select_value("select #{sequence_name}.nextval from dual")
+        ActiveRecord::Base.connection.execute("alter sequence #{sequence_name} increment by 1")
+      rescue
+        puts "[Iron Fixture Extractor] WARNING: couldnt alter the sequence #{sequence_name}"
       end
     end
   end
